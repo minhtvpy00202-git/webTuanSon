@@ -39,6 +39,21 @@ model CompanyInfo {
   @@map("company_info")
 }
 
+model ContactInquiry {
+  id              Int      @id @default(autoincrement())
+  fullName        String
+  phone           String
+  email           String
+  productInterest String?
+  message         String
+  status          String   @default("new")
+  createdAt       DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("contact_inquiries")
+}
+
 model Category {
   id       Int       @id @default(autoincrement())
   name     String
