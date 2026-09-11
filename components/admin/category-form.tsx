@@ -50,45 +50,45 @@ export function CategoryForm() {
 
   return (
     <form
-      className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+      className="space-y-4 bg-white p-6 ring-1 ring-slate-200"
       onSubmit={handleSubmit}
     >
       <div className="space-y-2">
-        <p className="text-sm font-medium text-blue-600">Thêm loại sản phẩm</p>
-        <h2 className="text-xl font-semibold text-slate-900">Tạo loại mới</h2>
+        <p className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">Thêm loại sản phẩm</p>
+        <h2 className="text-xl font-normal tracking-[0.4px] text-slate-900">Tạo loại mới</h2>
       </div>
 
       {message ? (
-        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700">
+        <div className="border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm tracking-[0.4px] text-[var(--foreground)]">
           {message}
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+        <div className="border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm tracking-[0.4px] text-[var(--foreground)]">
           {errorMessage}
         </div>
       ) : null}
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900">Tên loại sản phẩm</span>
+        <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Tên loại sản phẩm</span>
         <input
           type="text"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+          className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
           placeholder="Ví dụ: Gạch ốp lát"
           required
         />
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900">Slug (tùy chọn)</span>
+        <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Slug (tùy chọn)</span>
         <input
           type="text"
           value={slug}
           onChange={(event) => setSlug(event.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+          className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
           placeholder="Ví dụ: gach-op-lat"
         />
       </label>
@@ -96,7 +96,7 @@ export function CategoryForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+        className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting ? "Đang tạo..." : "Tạo loại sản phẩm"}
       </button>

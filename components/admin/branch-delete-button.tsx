@@ -44,7 +44,7 @@ export function BranchDeleteButton({ branchId }: BranchDeleteButtonProps) {
       <button
         type="button"
         onClick={handleDelete}
-        className="inline-flex rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-sm"
+        className="mhv-btn-secondary inline-flex border border-[var(--border)] bg-white px-3 py-2 text-xs font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
       >
         {isDeleting ? "Đang xoá..." : "Xoá"}
       </button>

@@ -9,7 +9,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
-    "db:backfill-units": "tsx scripts/backfill-product-units.ts"
+    "db:backfill-units": "tsx scripts/backfill-product-units.ts",
+    "db:backfill-main-images": "tsx scripts/backfill-product-main-images.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

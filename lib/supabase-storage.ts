@@ -1,11 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
+const SUPABASE_PROJECT_REF_FALLBACK = "mkrmnlflnxmcpnldbaiq";
+
 function getSupabaseUrl() {
   const explicitUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL ||
+    process.env.NEXT_PUBLIC_SUPABASE_HOST ||
+    process.env.SUPABASE_HOST;
 
   if (explicitUrl) {
-    return explicitUrl;
+    return explicitUrl.startsWith("http") ? explicitUrl : `https://${explicitUrl}`;
   }
 
   const databaseUrl = process.env.DATABASE_URL || process.env.DIRECT_URL || "";
@@ -19,8 +24,14 @@ function getSupabaseUrl() {
     projectRef = "";
   }
 
+  if (!projectRef && SUPABASE_PROJECT_REF_FALLBACK) {
+    projectRef = SUPABASE_PROJECT_REF_FALLBACK;
+  }
+
   if (!projectRef) {
-    throw new Error("Không xác định được NEXT_PUBLIC_SUPABASE_URL.");
+    throw new Error(
+      "Không xác định được NEXT_PUBLIC_SUPABASE_URL. Hãy thêm NEXT_PUBLIC_SUPABASE_URL=\"https://<project-ref>.supabase.co\" vào file .env.",
+    );
   }
 
   return `https://${projectRef}.supabase.co`;
@@ -76,4 +87,23 @@ export async function uploadProductImage(file: File) {
     path: objectPath,
     publicUrl: data.publicUrl,
   };
+}
+
+/** Upload nhiều ảnh sản phẩm cùng lúc, trả về mảng kết quả. */
+export async function uploadProductImages(files: File[]): Promise<Array<{ path: string; publicUrl: string }>> {
+  return Promise.all(files.map((file) => uploadProductImage(file)))
+}
+
+/** Xóa ảnh sản phẩm theo đường dẫn storage, an toàn với null/undefined và không throw lỗi. */
+export async function deleteProductImageByPath(storagePath: string | null | undefined): Promise<void> {
+  if (!storagePath) {
+    return
+  }
+
+  try {
+    const storage = getSupabaseStorageAdminClient()
+    await storage.storage.from("Product").remove([storagePath])
+  } catch (error) {
+    console.warn(`Không xóa được ảnh sản phẩm ${storagePath}:`, error)
+  }
 }

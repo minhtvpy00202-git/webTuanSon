@@ -5,10 +5,17 @@ import { prisma } from "@/lib/prisma";
 import { uploadProductImage } from "@/lib/supabase-storage";
 
 type UnitPricePayload = {
-  categoryUnitId: number;
+  categoryUnitId: string | number;
   label?: string;
   price: string;
   discountPrice?: string;
+};
+
+type ParsedUnitPrice = {
+  categoryUnitId: number | null;
+  label: string;
+  price: number | null;
+  discountPrice: number | null;
 };
 
 function parseCurrency(value: string | null | undefined) {
@@ -24,7 +31,7 @@ function parseCurrency(value: string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function parseUnitPrices(rawValue: FormDataEntryValue | null) {
+function parseUnitPrices(rawValue: FormDataEntryValue | null): ParsedUnitPrice[] {
   if (typeof rawValue !== "string" || !rawValue.trim()) {
     return [];
   }
@@ -36,12 +43,16 @@ function parseUnitPrices(rawValue: FormDataEntryValue | null) {
   }
 
   return parsed
-    .map((item) => ({
-      categoryUnitId: Number(item.categoryUnitId),
-      price: parseCurrency(item.price),
-      discountPrice: parseCurrency(item.discountPrice),
-    }))
-    .filter((item) => Number.isFinite(item.categoryUnitId) && item.price !== null);
+    .map((item) => {
+      const numericId = Number(item.categoryUnitId);
+      return {
+        categoryUnitId: Number.isFinite(numericId) ? numericId : null,
+        label: String(item.label ?? "").trim(),
+        price: parseCurrency(item.price),
+        discountPrice: parseCurrency(item.discountPrice),
+      };
+    })
+    .filter((item) => item.price !== null);
 }
 
 export async function POST(request: Request) {
@@ -76,16 +87,6 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!(imageFile instanceof File) || imageFile.size === 0) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Vui lòng chọn ảnh sản phẩm để upload.",
-      },
-      { status: 400 },
-    );
-  }
-
   let unitPrices: ReturnType<typeof parseUnitPrices> = [];
 
   try {
@@ -108,6 +109,54 @@ export async function POST(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  let images: Array<{
+    id?: number;
+    imageUrl: string;
+    storagePath?: string | null;
+    isMain: boolean;
+    sortOrder: number;
+  }> = [];
+
+  try {
+    const rawImages = formData.get("images");
+    if (typeof rawImages === "string" && rawImages.trim()) {
+      const parsed = JSON.parse(rawImages);
+      if (Array.isArray(parsed)) {
+        images = parsed.filter(
+          (x) => x && typeof x.imageUrl === "string",
+        );
+      }
+    }
+  } catch {
+    images = [];
+  }
+
+  if (images.length === 0 && imageFile instanceof File && imageFile.size > 0) {
+    const uploadedFallback = await uploadProductImage(imageFile);
+    images = [
+      {
+        imageUrl: uploadedFallback.publicUrl,
+        storagePath: uploadedFallback.path,
+        isMain: true,
+        sortOrder: 0,
+      },
+    ];
+  }
+
+  if (images.length === 0) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Vui lòng chọn ít nhất 1 ảnh sản phẩm.",
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!images.some((x) => x.isMain)) {
+    images[0].isMain = true;
   }
 
   if (
@@ -156,7 +205,47 @@ export async function POST(request: Request) {
 
     const allowedUnitIds = new Set(category.units.map((unit) => unit.id));
 
-    if (unitPrices.some((item) => !allowedUnitIds.has(item.categoryUnitId))) {
+    for (let i = 0; i < unitPrices.length; i++) {
+      const item = unitPrices[i];
+
+      if (item.categoryUnitId !== null && allowedUnitIds.has(item.categoryUnitId)) {
+        continue;
+      }
+
+      if (!item.label) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Có đơn vị tính tùy chỉnh thiếu tên.",
+          },
+          { status: 400 },
+        );
+      }
+
+      let matchedUnit = category.units.find(
+        (unit) => unit.label.toLowerCase() === item.label.toLowerCase(),
+      );
+
+      if (!matchedUnit) {
+        matchedUnit = await prisma.categoryUnit.create({
+          data: {
+            categoryId,
+            label: item.label,
+            sortOrder: 9999,
+            isDefault: false,
+          },
+        });
+        category.units.push(matchedUnit);
+        allowedUnitIds.add(matchedUnit.id);
+      }
+
+      unitPrices[i] = {
+        ...item,
+        categoryUnitId: matchedUnit.id,
+      };
+    }
+
+    if (unitPrices.some((item) => item.categoryUnitId === null || !allowedUnitIds.has(item.categoryUnitId))) {
       return NextResponse.json(
         {
           success: false,
@@ -176,7 +265,7 @@ export async function POST(request: Request) {
     const primaryUnitPrice =
       unitPrices.find((item) => item.categoryUnitId === primaryUnit.id) ?? unitPrices[0];
 
-    const uploadedImage = await uploadProductImage(imageFile);
+    const mainImage = images.find((x) => x.isMain) ?? images[0];
 
     const product = await prisma.product.create({
       data: {
@@ -187,13 +276,21 @@ export async function POST(request: Request) {
         price: primaryUnitPrice.price!,
         discountPrice: primaryUnitPrice.discountPrice,
         isPromotion,
-        imageUrl: uploadedImage.publicUrl,
+        imageUrl: mainImage.imageUrl,
         categoryId,
         unitPrices: {
           create: unitPrices.map((item) => ({
-            categoryUnitId: item.categoryUnitId,
+            categoryUnitId: item.categoryUnitId as number,
             price: item.price!,
             discountPrice: item.discountPrice,
+          })),
+        },
+        images: {
+          create: images.map((img, idx) => ({
+            imageUrl: img.imageUrl,
+            storagePath: img.storagePath ?? null,
+            isMain: !!img.isMain,
+            sortOrder: Number.isFinite(img.sortOrder) ? img.sortOrder : idx,
           })),
         },
       },

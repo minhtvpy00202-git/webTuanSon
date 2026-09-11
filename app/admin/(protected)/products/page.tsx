@@ -32,6 +32,9 @@ export default async function AdminProductsPage() {
             },
           },
         },
+        images: {
+          orderBy: [{ isMain: "desc" }, { sortOrder: "asc" }, { id: "asc" }],
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -68,6 +71,13 @@ export default async function AdminProductsPage() {
           isDefault: unitPrice.categoryUnit.isDefault,
           price: unitPrice.price.toString(),
           discountPrice: unitPrice.discountPrice?.toString() ?? null,
+        })),
+        images: product.images.map((img) => ({
+          id: img.id,
+          imageUrl: img.imageUrl,
+          storagePath: img.storagePath ?? null,
+          isMain: img.isMain,
+          sortOrder: img.sortOrder,
         })),
       }))}
     />

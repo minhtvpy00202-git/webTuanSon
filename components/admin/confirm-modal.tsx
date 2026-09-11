@@ -43,10 +43,10 @@ export function ConfirmModal({
   return (
     <AdminModal open={open} title={title} onClose={onClose} maxWidthClassName="max-w-lg">
       <div className="space-y-5">
-        <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">{description}</p>
+        <p className="text-sm font-normal leading-7 text-slate-600 dark:text-slate-400 tracking-[0.4px]">{description}</p>
 
         {errorMessage ? (
-          <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10">
+          <div className="border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm text-red-600 dark:border-slate-700 dark:bg-slate-900 tracking-[0.4px]">
             {errorMessage}
           </div>
         ) : null}
@@ -55,7 +55,7 @@ export function ConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 ease-in-out hover:border-orange-300 hover:bg-orange-50 hover:text-[var(--primary)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+            className="inline-flex border border-[var(--border)] bg-white px-4 py-2.5 text-sm font-normal text-slate-700 transition-all duration-200 ease-in-out hover:opacity-70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 tracking-[0.4px]"
           >
             Hủy
           </button>
@@ -63,7 +63,7 @@ export function ConfirmModal({
             type="button"
             onClick={handleConfirm}
             disabled={isSubmitting}
-            className="inline-flex rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 ease-in-out hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex border border-[var(--foreground)] bg-[var(--surface-muted)] px-4 py-2.5 text-sm font-normal text-red-600 transition-all duration-200 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70 tracking-[0.4px]"
           >
             {isSubmitting ? "Đang xử lý..." : confirmLabel}
           </button>

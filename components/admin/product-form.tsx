@@ -110,46 +110,46 @@ export function ProductForm({ categories }: ProductFormProps) {
 
   return (
     <form
-      className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+      className="space-y-4 bg-white p-6 ring-1 ring-slate-200"
       onSubmit={handleSubmit}
     >
       <div className="space-y-2">
-        <p className="text-sm font-medium text-blue-600">Thêm sản phẩm</p>
-        <h2 className="text-xl font-semibold text-slate-900">Tạo sản phẩm mới</h2>
+        <p className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">Thêm sản phẩm</p>
+        <h2 className="text-xl font-normal tracking-[0.4px] text-slate-900">Tạo sản phẩm mới</h2>
       </div>
 
       {message ? (
-        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700">
+        <div className="border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm tracking-[0.4px] text-[var(--foreground)]">
           {message}
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+        <div className="border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm tracking-[0.4px] text-[var(--foreground)]">
           {errorMessage}
         </div>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Mã sản phẩm</span>
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Mã sản phẩm</span>
           <input
             type="text"
             value={formData.productCode}
             onChange={(event) => updateField("productCode", event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
             placeholder="Ví dụ: GACH-600X600-010"
             required
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Tên sản phẩm</span>
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Tên sản phẩm</span>
           <input
             type="text"
             value={formData.name}
             onChange={(event) => updateField("name", event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
             placeholder="Ví dụ: Gạch lát nền Prime 600x600"
             required
           />
@@ -157,11 +157,11 @@ export function ProductForm({ categories }: ProductFormProps) {
       </div>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900">Mô tả</span>
+        <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Mô tả</span>
         <textarea
           value={formData.description}
           onChange={(event) => updateField("description", event.target.value)}
-          className="min-h-28 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+          className="min-h-28 w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
           placeholder="Mô tả ngắn về sản phẩm"
           required
         />
@@ -169,22 +169,22 @@ export function ProductForm({ categories }: ProductFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Quy cách / mẫu mã</span>
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Quy cách / mẫu mã</span>
           <input
             type="text"
             value={formData.specs}
             onChange={(event) => updateField("specs", event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
             placeholder="Ví dụ: 600x600mm, men mờ"
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Loại sản phẩm</span>
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Loại sản phẩm</span>
           <select
             value={formData.categoryId}
             onChange={(event) => updateField("categoryId", event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out focus:border-[var(--foreground)]"
             required
           >
             <option value="">Chọn loại sản phẩm</option>
@@ -199,48 +199,48 @@ export function ProductForm({ categories }: ProductFormProps) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Giá gốc</span>
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Giá gốc</span>
           <input
             type="number"
             min="0"
             value={formData.price}
             onChange={(event) => updateField("price", event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
             placeholder="Ví dụ: 325000"
             required
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Giá khuyến mãi</span>
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Giá khuyến mãi</span>
           <input
             type="number"
             min="0"
             value={formData.discountPrice}
             onChange={(event) => updateField("discountPrice", event.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 focus:border-[var(--foreground)]"
             placeholder="Để trống nếu không có"
           />
         </label>
       </div>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900">Ảnh sản phẩm</span>
+        <span className="text-sm font-normal tracking-[0.4px] text-slate-900">Ảnh sản phẩm</span>
         <input
           type="file"
           accept="image/*"
           onChange={(event) => updateField("image", event.target.files?.[0] ?? null)}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+          className="w-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-900 outline-none transition-all duration-300 ease-in-out file:mr-4 file:border-0 file:bg-[var(--surface-muted)] file:px-3 file:py-2 file:text-sm file:font-normal file:tracking-[0.4px] file:text-[var(--foreground)] hover:file:opacity-70"
           required
         />
       </label>
 
-      <label className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+      <label className="flex items-center gap-3 bg-[var(--surface-muted)] px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-700">
         <input
           type="checkbox"
           checked={formData.isPromotion}
           onChange={(event) => updateField("isPromotion", event.target.checked)}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          className="h-4 w-4 border-slate-300 text-[var(--foreground)] focus:ring-[var(--foreground)]"
         />
         Đánh dấu sản phẩm đang khuyến mãi
       </label>
@@ -248,7 +248,7 @@ export function ProductForm({ categories }: ProductFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+        className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting ? "Đang tạo sản phẩm..." : "Tạo sản phẩm"}
       </button>

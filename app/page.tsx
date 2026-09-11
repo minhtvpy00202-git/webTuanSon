@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { ProductCard } from "@/components/products/product-card";
 import { getCompanyInfoWithBranches } from "@/lib/company";
+import { prisma } from "@/lib/prisma";
 
 const quickLinks = [
   {
@@ -25,113 +27,176 @@ const quickLinks = [
   },
 ];
 
-type InfoCardProps = {
-  label: string;
-  value: string;
-  href?: string;
+const productInclude = {
+  category: true,
+  images: {
+    take: 1,
+    orderBy: [{ isMain: "desc" as const }, { sortOrder: "asc" as const }],
+  },
+  unitPrices: {
+    take: 1,
+    include: {
+      categoryUnit: true,
+    },
+  },
 };
 
-function InfoCard({ label, value, href }: InfoCardProps) {
-  const content = (
-    <div className="mhv-card h-full p-5 transition-all duration-200 ease-in-out hover:-translate-y-0.5">
-      <p className="text-sm font-semibold text-[var(--primary)]">{label}</p>
-      <p className="mt-2 text-base leading-7 text-slate-900 dark:text-slate-100">{value}</p>
-    </div>
-  );
+type RawProduct = Awaited<ReturnType<typeof prisma.product.findMany<{ include: typeof productInclude }>>>[number];
 
-  if (href) {
-    return (
-      <a href={href} className="block">
-        {content}
-      </a>
-    );
-  }
+function mapProductForCard(product: RawProduct) {
+  const unitPrice = product.unitPrices?.[0];
+  const image = product.images?.[0];
 
-  return content;
+  return {
+    id: product.id,
+    name: product.name,
+    productCode: product.productCode,
+    description: product.description,
+    specs: product.specs,
+    price: unitPrice?.price?.toString() ?? (product as unknown as { price?: number | string }).price?.toString() ?? "0",
+    discountPrice:
+      unitPrice?.discountPrice?.toString() ??
+      (product as unknown as { discountPrice?: number | string | null }).discountPrice?.toString() ??
+      null,
+    unitLabel: unitPrice?.categoryUnit?.label ?? "",
+    imageUrl: image?.imageUrl ?? (product as unknown as { imageUrl?: string }).imageUrl ?? "",
+    isPromotion: product.isPromotion,
+    category: {
+      name: product.category?.name ?? "",
+    },
+  };
 }
 
 export default async function HomePage() {
   const { companyInfo } = await getCompanyInfoWithBranches();
 
+  const [newestProducts, promotionProducts] = await Promise.all([
+    prisma.product.findMany({
+      take: 4,
+      orderBy: { createdAt: "desc" },
+      include: productInclude,
+    }),
+    prisma.product.findMany({
+      take: 4,
+      where: { isPromotion: true },
+      orderBy: { createdAt: "desc" },
+      include: productInclude,
+    }),
+  ]);
+
+  const newestCards = newestProducts.map(mapProductForCard);
+  const promotionCards = promotionProducts.map(mapProductForCard);
+
   return (
-    <section className="space-y-8">
-      <div className="mhv-card overflow-hidden p-6 sm:p-8">
-        <div className="space-y-4">
-          <span className="inline-flex rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-sm font-semibold text-[var(--primary)] dark:border-orange-500/20 dark:bg-orange-500/10">
-            {companyInfo?.companyName || "Digital Catalogue vật liệu xây dựng"}
-          </span>
+    <section className="space-y-12">
+      <div className="w-full aspect-[16/9] lg:aspect-[21/9] lv-hero-stage overflow-hidden">
+        <div className="w-full h-full flex items-center justify-center p-6 sm:p-10 lg:p-16 lv-fade-in">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <span className="inline-flex lv-hero-pill px-4 py-1.5 text-sm font-normal tracking-[0.4px]">
+              {companyInfo?.companyName || "Digital Catalogue vật liệu xây dựng"}
+            </span>
 
-          <div className="space-y-3">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-slate-50">
-              Vật liệu xây dựng chất lượng cho công trình bền vững và hiện đại
-            </h1>
-            <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
-              {companyInfo?.aboutUs ??
-                "Chúng tôi cung cấp catalogue điện tử cho gạch ốp lát, ngói và thiết bị vệ sinh với nội dung đang được cập nhật."}
-            </p>
-          </div>
+            <div className="space-y-4">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-normal tracking-[0.4px]">
+                Vật liệu xây dựng chất lượng cho công trình bền vững và hiện đại
+              </h1>
+              <p className="max-w-3xl mx-auto text-sm sm:text-base leading-7 opacity-80 tracking-[0.4px]">
+                {companyInfo?.aboutUs ??
+                  "Chúng tôi cung cấp catalogue điện tử cho gạch ốp lát, ngói và thiết bị vệ sinh với nội dung đang được cập nhật."}
+              </p>
+            </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-2">
-            <Link
-              href="/products"
-              className="mhv-btn-primary inline-flex w-full justify-center rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-sm"
-            >
-              Xem danh mục sản phẩm
-            </Link>
-            <Link
-              href="/contact"
-              className="mhv-btn-secondary inline-flex w-full justify-center rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out hover:-translate-y-0.5"
-            >
-              Gửi yêu cầu tư vấn
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
+              <Link
+                href="/products"
+                className="mhv-btn-primary inline-flex w-full sm:w-auto justify-center px-6 py-3 text-sm font-normal transition-all duration-300 ease-in-out hover:opacity-70 tracking-[0.4px] lv-solid-primary"
+              >
+                Xem danh mục sản phẩm
+              </Link>
+              <Link
+                href="/contact"
+                className="lv-hero-btn-outline inline-flex w-full sm:w-auto justify-center px-6 py-3 text-sm font-normal transition-all duration-300 ease-in-out hover:opacity-70 tracking-[0.4px]"
+              >
+                Gửi yêu cầu tư vấn
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <div className="mhv-card p-6 sm:p-8">
-          <div className="space-y-3">
-            <p className="text-sm font-semibold text-[var(--primary)]">Nhiệm vụ & Sứ mệnh</p>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-              Đồng hành cùng khách hàng trong từng quyết định chọn vật liệu
+      <div className="max-w-full px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-2">
+            <span className="inline-flex border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
+              Sản phẩm mới
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+              Mẫu vật liệu mới nhất
             </h2>
-            <p className="whitespace-pre-line text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
-              {companyInfo?.mission ??
-                "Nội dung nhiệm vụ doanh nghiệp đang được cập nhật."}
-            </p>
-            <p className="whitespace-pre-line text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
-              {companyInfo?.vision ??
-                "Nội dung sứ mệnh doanh nghiệp đang được cập nhật."}
+            <p className="text-sm text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+              Cập nhật các dòng sản phẩm mới nhất cho công trình hiện đại và bền vững.
             </p>
           </div>
+          <Link
+            href="/products"
+            className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px] transition-opacity duration-300 ease-in-out hover:opacity-70"
+          >
+            Xem tất cả →
+          </Link>
         </div>
 
-        <div className="grid gap-4">
-          <InfoCard
-            label="Số điện thoại"
-            value={companyInfo?.phone ?? "Đang cập nhật"}
-            href={companyInfo?.phone ? `tel:${companyInfo.phone.replace(/\s+/g, "")}` : undefined}
-          />
-          <InfoCard
-            label="Email"
-            value={companyInfo?.email ?? "Đang cập nhật"}
-            href={companyInfo?.email ? `mailto:${companyInfo.email}` : undefined}
-          />
-          <InfoCard label="Địa chỉ" value={companyInfo?.address ?? "Đang cập nhật"} />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {newestCards.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {quickLinks.map((item) => (
+      <div className="max-w-full px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-2">
+            <span className="inline-flex border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
+              Sản phẩm khuyến mãi
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+              Ưu đãi đang diễn ra
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+              Các sản phẩm đang có chương trình khuyến mãi đặc biệt, tiết kiệm chi phí tối ưu.
+            </p>
+          </div>
           <Link
-            key={item.href}
-            href={item.href}
-            className="mhv-card p-6 transition-all duration-200 ease-in-out hover:-translate-y-1"
+            href="/promotions"
+            className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px] transition-opacity duration-300 ease-in-out hover:opacity-70"
           >
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{item.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{item.description}</p>
+            Xem khuyến mãi →
           </Link>
-        ))}
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {promotionCards.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </div>
+
+      <div className="max-w-full px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+          {quickLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="mhv-card p-6 transition-all duration-300 ease-in-out hover:opacity-70"
+            >
+              <h2 className="text-lg font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+                {item.title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+                {item.description}
+              </p>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

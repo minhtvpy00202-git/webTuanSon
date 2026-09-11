@@ -37,9 +37,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="vi">
       <body className="antialiased">
-        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-normal tracking-[0.4px]">
           <SiteHeader companyName={companyInfo?.companyName} session={session} />
-          <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</main>
+          <main className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</main>
           <FloatingContactButton
             phone={companyInfo?.phone}
             email={companyInfo?.email}

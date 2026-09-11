@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --muted: #475569;
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #6b7280;
   --card: #ffffff;
-  --border: #e2e8f0;
-  --primary: #f27024;
-  --primary-hover: #d25a15;
+  --border: #e5e5e5;
+  --primary: #000000;
+  --primary-hover: #1f1f1f;
   --primary-foreground: #ffffff;
-  --surface-muted: #f1f5f9;
-  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+  --surface-muted: #f5f5f5;
+  --shadow-soft: none;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-    --muted: #94a3b8;
-    --card: #0f172a;
-    --border: #334155;
-    --primary: #f27024;
-    --primary-hover: #d25a15;
-    --primary-foreground: #ffffff;
-    --surface-muted: #0b1220;
-    --shadow-soft: 0 18px 42px rgba(2, 6, 23, 0.45);
+    --background: #000000;
+    --foreground: #ffffff;
+    --muted: #9ca3af;
+    --card: #111111;
+    --border: #262626;
+    --primary: #ffffff;
+    --primary-hover: #e5e5e5;
+    --primary-foreground: #000000;
+    --surface-muted: #1a1a1a;
+    --shadow-soft: none;
     color-scheme: dark;
   }
 }
@@ -44,118 +44,333 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.4px;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+  transition: opacity 300ms ease-in-out;
+}
+
+a:hover {
+  opacity: 0.7;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::selection {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}
+
+*,
+*::before,
+*::after {
+  border-radius: 0 !important;
 }
 
 .mhv-card {
   border: 1px solid var(--border);
   background: var(--card);
-  border-radius: 1.5rem;
-  box-shadow: var(--shadow-soft);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .mhv-muted-surface {
   border: 1px solid var(--border);
   background: var(--surface-muted);
-  border-radius: 1.25rem;
+  border-radius: 0;
 }
 
 .mhv-btn-primary {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--foreground);
+  color: var(--background);
+  border: 1px solid var(--foreground);
+  border-radius: 0;
+  transition: all 300ms ease-in-out;
+  font-weight: 400;
+  letter-spacing: 0.4px;
 }
 
 .mhv-btn-primary:hover {
-  background: var(--primary-hover);
+  opacity: 0.7;
+}
+
+.lv-solid-primary {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 0;
+  transition: opacity 300ms ease-in-out;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.lv-solid-primary:hover {
+  opacity: 0.7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lv-solid-primary {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+  }
+}
+
+.lv-chip-active {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 0;
+  transition: opacity 300ms ease-in-out;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.lv-chip-active:hover {
+  opacity: 0.7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lv-chip-active {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+  }
+}
+
+.lv-hero-stage {
+  background: #000000;
+  color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lv-hero-stage {
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid #262626;
+  }
+}
+
+.lv-hero-pill {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  background: transparent;
+  transition: opacity 300ms ease-in-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lv-hero-pill {
+    border-color: #e5e5e5;
+    color: #e5e5e5;
+  }
+}
+
+.lv-hero-btn-outline {
+  border: 1px solid #ffffff;
+  background: transparent;
+  color: #ffffff;
+  border-radius: 0;
+  transition: opacity 300ms ease-in-out;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.lv-hero-btn-outline:hover {
+  opacity: 0.7;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lv-hero-btn-outline {
+    border-color: #e5e5e5;
+    color: #e5e5e5;
+  }
 }
 
 .mhv-btn-secondary {
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--foreground);
+  border-radius: 0;
+  transition: all 300ms ease-in-out;
+  font-weight: 400;
+  letter-spacing: 0.4px;
 }
 
 .mhv-btn-secondary:hover {
-  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 7%, var(--card));
+  border-color: var(--foreground);
+  opacity: 0.7;
 }
 
 .mhv-input {
   width: 100%;
-  border-radius: 0.9rem;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--foreground);
   padding: 0.85rem 1rem;
   outline: none;
+  font-weight: 400;
+  letter-spacing: 0.4px;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
+    border-color 300ms ease,
+    background-color 300ms ease,
+    color 300ms ease;
 }
 
 .mhv-input::placeholder {
-  color: color-mix(in srgb, var(--muted) 80%, transparent);
+  color: var(--muted);
+  opacity: 0.7;
 }
 
 .mhv-input:focus {
-  border-color: color-mix(in srgb, var(--primary) 55%, white);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 12%, transparent);
+  border-color: var(--foreground);
 }
 
 .mhv-file-input {
   width: 100%;
-  border-radius: 0.9rem;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--foreground);
   padding: 0.8rem 1rem;
+  font-weight: 400;
+  letter-spacing: 0.4px;
 }
 
 .mhv-file-input::file-selector-button {
   margin-right: 0.85rem;
   border: 0;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--primary) 10%, var(--card));
-  color: var(--primary);
+  border-radius: 0;
+  background: var(--surface-muted);
+  color: var(--foreground);
   padding: 0.65rem 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
+  letter-spacing: 0.4px;
+  transition: opacity 300ms ease-in-out;
 }
 
 .mhv-file-input::file-selector-button:hover {
-  background: color-mix(in srgb, var(--primary) 16%, var(--card));
+  opacity: 0.7;
 }
 
 .mhv-checkbox {
-  accent-color: var(--primary);
+  accent-color: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mhv-checkbox {
+    accent-color: #ffffff;
+  }
 }
 
 .mhv-chip {
-  border-radius: 9999px;
-  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
-  background: color-mix(in srgb, var(--primary) 10%, var(--card));
-  color: var(--primary);
+  border-radius: 0;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--foreground);
+  padding: 0.25rem 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.4px;
+  font-size: 0.75rem;
 }
 
 .mhv-alert-success {
-  border: 1px solid color-mix(in srgb, #10b981 24%, var(--border));
-  background: color-mix(in srgb, #10b981 10%, var(--card));
-  color: color-mix(in srgb, #047857 82%, black);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--foreground);
+  font-weight: 400;
+  letter-spacing: 0.4px;
 }
 
 .mhv-alert-danger {
-  border: 1px solid color-mix(in srgb, #ef4444 24%, var(--border));
-  background: color-mix(in srgb, #ef4444 10%, var(--card));
-  color: color-mix(in srgb, #b91c1c 82%, black);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--foreground);
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.lv-hero-stage {
+  background: #000000;
+  color: #ffffff;
+}
+
+.lv-text-display {
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.lv-fade-in {
+  animation: lv-fade-in 600ms ease-in-out both;
+}
+
+@keyframes lv-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lv-slide-left-enter {
+  animation: lv-slide-left-in 400ms ease-in-out both;
+}
+
+@keyframes lv-slide-left-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.lv-slide-top-enter {
+  animation: lv-slide-top-in 400ms ease-in-out both;
+}
+
+@keyframes lv-slide-top-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.lv-menu-slide-enter {
+  animation: lv-slide-top-in 400ms ease-in-out both;
+}
+
+@media (min-width: 1024px) {
+  .lv-menu-slide-enter {
+    animation-name: lv-slide-left-in;
+  }
+}
+
+.lv-img-hover {
+  transition: transform 300ms ease-in-out;
+}
+
+.lv-img-hover:hover {
+  transform: scale(1.05);
+}
+
+.lv-link-hover {
+  transition: opacity 300ms ease-in-out;
+}
+
+.lv-link-hover:hover {
+  opacity: 0.7;
 }

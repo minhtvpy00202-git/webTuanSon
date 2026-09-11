@@ -98,13 +98,13 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
       <div className="mhv-card p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-[var(--primary)]">
+            <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">
               Quản lý loại sản phẩm
             </p>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            <h2 className="text-2xl font-normal text-[var(--foreground)] tracking-[0.4px]">
               Danh sách loại sản phẩm
             </h2>
-            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p className="text-sm font-normal leading-6 text-[var(--muted)] tracking-[0.4px]">
               Theo dõi danh mục hiện có, tìm kiếm nhanh và thao tác trực tiếp bằng
               modal.
             </p>
@@ -113,7 +113,7 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
           <button
             type="button"
             onClick={() => setIsCreateOpen(true)}
-            className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out"
+            className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
           >
             + Thêm loại sản phẩm
           </button>
@@ -126,56 +126,56 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Tìm theo tên loại hoặc slug"
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
         />
       </div>
 
       <div className="mhv-card overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-5">
           <div>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-lg font-normal text-[var(--foreground)] tracking-[0.4px]">
               Danh sách loại sản phẩm
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">
               Hiển thị {filteredCategories.length} / {categories.length} loại sản phẩm
             </p>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
-            <thead className="bg-slate-50 text-left text-slate-600 dark:bg-slate-900/70 dark:text-slate-300">
+          <table className="min-w-full divide-y divide-[var(--border)] text-sm">
+            <thead className="bg-[var(--surface-muted)] text-left text-[var(--foreground)]">
               <tr>
-                <th className="px-6 py-4 font-semibold">Tên loại</th>
-                <th className="px-6 py-4 font-semibold">Slug</th>
-                <th className="px-6 py-4 font-semibold">Đơn vị tính</th>
-                <th className="px-6 py-4 font-semibold">Số sản phẩm</th>
-                <th className="px-6 py-4 font-semibold text-right">Thao tác</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Tên loại</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Slug</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Đơn vị tính</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Số sản phẩm</th>
+                <th className="px-6 py-4 font-normal text-right tracking-[0.4px]">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-950/40">
+            <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
               {filteredCategories.length ? (
                 filteredCategories.map((category) => (
                   <tr
                     key={category.id}
-                    className="transition-colors duration-200 hover:bg-slate-50/80 dark:hover:bg-slate-900/60"
+                    className="transition-colors duration-200 hover:bg-[var(--surface-muted)]"
                   >
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
+                    <td className="px-6 py-4 font-normal text-[var(--foreground)] tracking-[0.4px]">
                       {category.name}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
                       {category.slug}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
                       <div className="flex flex-wrap gap-2">
                         {category.units.length ? (
                           category.units.map((unit) => (
                             <span
                               key={unit.id}
-                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                              className={`inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] ${
                                 unit.isDefault
                                   ? "mhv-chip"
-                                  : "bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-300"
+                                  : "border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
                               }`}
                             >
                               {unit.label}
@@ -183,11 +183,11 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
                             </span>
                           ))
                         ) : (
-                          <span className="text-xs text-slate-400">Chưa cấu hình</span>
+                          <span className="text-xs font-normal text-[var(--muted)] tracking-[0.4px]">Chưa cấu hình</span>
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
                       {category.productCount} sản phẩm
                     </td>
                     <td className="px-6 py-4">
@@ -195,7 +195,7 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
                         <button
                           type="button"
                           onClick={() => setEditingCategory(category)}
-                          className="mhv-btn-secondary inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ease-in-out"
+                          className="mhv-btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
                         >
                           <PencilIcon />
                           Chỉnh sửa
@@ -203,7 +203,7 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
                         <button
                           type="button"
                           onClick={() => setDeletingCategory(category)}
-                          className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition-all duration-200 ease-in-out hover:bg-red-50"
+                          className="inline-flex items-center gap-2 border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-normal text-red-600 transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
                         >
                           <TrashIcon />
                           Xóa
@@ -216,7 +216,7 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
+                    className="px-6 py-10 text-center text-sm font-normal text-[var(--muted)] tracking-[0.4px]"
                   >
                     Không tìm thấy loại sản phẩm phù hợp.
                   </td>

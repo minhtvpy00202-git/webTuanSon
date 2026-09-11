@@ -41,17 +41,17 @@ export function CategoryFilter({
   return (
     <section className="mhv-card space-y-4 p-4 sm:p-6">
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-[var(--primary)]">Danh mục sản phẩm</p>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Lọc theo nhóm vật liệu</h2>
+        <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">Danh mục sản phẩm</p>
+        <h2 className="text-xl font-normal text-[var(--foreground)] tracking-[0.4px]">Lọc theo nhóm vật liệu</h2>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <Link
           href={buildHref()}
-          className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out ${
+          className={`border px-4 py-2.5 text-sm font-normal transition-all duration-200 ease-in-out tracking-[0.4px] ${
             !selectedCategory
-              ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm"
-              : "border-slate-200 bg-white text-slate-600 hover:-translate-y-0.5 hover:border-orange-300 hover:text-[var(--primary)] hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+              ? "lv-chip-active"
+              : "border-[var(--border)] bg-transparent text-[var(--foreground)] hover:opacity-70"
           }`}
         >
           Tất cả
@@ -64,14 +64,14 @@ export function CategoryFilter({
             <Link
               key={category.id}
               href={buildHref(category.slug)}
-              className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out ${
+              className={`border px-4 py-2.5 text-sm font-normal transition-all duration-200 ease-in-out tracking-[0.4px] ${
                 isActive
-                  ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-sm"
-                  : "border-slate-200 bg-white text-slate-600 hover:-translate-y-0.5 hover:border-orange-300 hover:text-[var(--primary)] hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                  ? "lv-chip-active"
+                  : "border-[var(--border)] bg-transparent text-[var(--foreground)] hover:opacity-70"
               }`}
             >
               {category.name}
-              <span className="ml-2 text-xs opacity-80">({category.productCount})</span>
+              <span className="ml-2 text-xs opacity-80 tracking-[0.4px]">({category.productCount})</span>
             </Link>
           );
         })}

@@ -94,40 +94,40 @@ export function CategoryModalForm({
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       {errorMessage ? (
-        <div className="mhv-alert-danger rounded-xl p-4 text-sm">
+        <div className="mhv-alert-danger p-4 text-sm tracking-[0.4px]">
           {errorMessage}
         </div>
       ) : null}
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
           Tên loại sản phẩm
         </span>
         <input
           type="text"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
           placeholder="Ví dụ: Gạch ốp lát"
           required
         />
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
           Slug
         </span>
         <input
           type="text"
           value={slug}
           onChange={(event) => setSlug(event.target.value)}
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
           placeholder="Ví dụ: gach-op-lat"
         />
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
           Đơn vị tính
         </span>
         <textarea
@@ -141,24 +141,24 @@ export function CategoryModalForm({
               setDefaultUnit(nextUnits[0]);
             }
           }}
-          className="mhv-input min-h-28 text-sm"
+          className="mhv-input min-h-28 text-sm tracking-[0.4px]"
           placeholder={"Mỗi dòng hoặc mỗi dấu phẩy là một đơn vị.\nVí dụ: cái\nchiếc\nhộp\nthùng\nm2"}
           required
         />
-        <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-normal leading-5 tracking-[0.4px] text-[var(--muted)]">
           Bạn có thể nhập nhiều đơn vị cho mỗi loại sản phẩm. Ví dụ: `m2`, `thùng`,
           `cái`, `chiếc`.
         </p>
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
           Đơn vị mặc định
         </span>
         <select
           value={defaultUnit}
           onChange={(event) => setDefaultUnit(event.target.value)}
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
           required
         >
           {parsedUnits.map((unit) => (
@@ -173,7 +173,7 @@ export function CategoryModalForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:opacity-70"
+          className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting
             ? "Đang lưu..."

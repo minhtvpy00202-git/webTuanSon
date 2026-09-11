@@ -72,107 +72,107 @@ export function BranchForm() {
       onSubmit={handleSubmit}
     >
       <div className="space-y-2">
-        <p className="text-sm font-medium text-[var(--primary)]">Chi nhánh & showroom</p>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+        <p className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">Chi nhánh & showroom</p>
+        <h2 className="text-xl font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
           Thêm địa chỉ mới
         </h2>
       </div>
 
       {message ? (
-        <div className="mhv-alert-success rounded-xl p-4 text-sm">
+        <div className="mhv-alert-success p-4 text-sm tracking-[0.4px]">
           {message}
         </div>
       ) : null}
 
       {errorMessage ? (
-        <div className="mhv-alert-danger rounded-xl p-4 text-sm">
+        <div className="mhv-alert-danger p-4 text-sm tracking-[0.4px]">
           {errorMessage}
         </div>
       ) : null}
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
           Tên chi nhánh / showroom
         </span>
         <input
           type="text"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
           required
         />
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
           Địa chỉ
         </span>
         <textarea
           value={address}
           onChange={(event) => setAddress(event.target.value)}
-          className="mhv-input min-h-24 text-sm"
+          className="mhv-input min-h-24 text-sm tracking-[0.4px]"
           required
         />
       </label>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
             Số điện thoại
           </span>
           <input
             type="text"
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
-            className="mhv-input text-sm"
+            className="mhv-input text-sm tracking-[0.4px]"
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
             Email
           </span>
           <input
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mhv-input text-sm"
+            className="mhv-input text-sm tracking-[0.4px]"
           />
         </label>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
             Link bản đồ
           </span>
           <input
             type="url"
             value={mapsLink}
             onChange={(event) => setMapsLink(event.target.value)}
-            className="mhv-input text-sm"
+            className="mhv-input text-sm tracking-[0.4px]"
           />
         </label>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <span className="text-sm font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
             Thứ tự hiển thị
           </span>
           <input
             type="number"
             value={sortOrder}
             onChange={(event) => setSortOrder(event.target.value)}
-            className="mhv-input text-sm"
+            className="mhv-input text-sm tracking-[0.4px]"
           />
         </label>
       </div>
 
-      <label className="mhv-muted-surface flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
+      <label className="mhv-muted-surface flex items-center gap-3 px-4 py-3 text-sm font-normal tracking-[0.4px] text-slate-700 dark:text-slate-300">
         <input
           type="checkbox"
           checked={isShowroom}
           onChange={(event) => setIsShowroom(event.target.checked)}
-          className="mhv-checkbox h-4 w-4 rounded border-slate-300"
+          className="mhv-checkbox h-4 w-4 border-slate-300"
         />
         Đánh dấu đây là showroom
       </label>
@@ -180,7 +180,7 @@ export function BranchForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+        className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting ? "Đang thêm..." : "Thêm chi nhánh"}
       </button>

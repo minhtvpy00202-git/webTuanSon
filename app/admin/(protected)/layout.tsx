@@ -32,11 +32,11 @@ export default async function AdminProtectedLayout({
       <div className="mhv-card p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-[var(--primary)]">Trang quản trị</p>
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">Trang quản trị</p>
+            <h1 className="text-2xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
               Xin chào, {session.username}
             </h1>
-            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p className="text-sm font-normal leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">
               Quản lý loại sản phẩm và sản phẩm trực tiếp từ dashboard admin.
             </p>
           </div>

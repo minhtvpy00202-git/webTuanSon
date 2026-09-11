@@ -39,6 +39,13 @@ type ProductRow = {
     price: string;
     discountPrice: string | null;
   }>;
+  images: Array<{
+    id: number;
+    imageUrl: string;
+    storagePath: string | null;
+    isMain: boolean;
+    sortOrder: number;
+  }>;
 };
 
 type ProductManagementProps = {
@@ -140,11 +147,11 @@ export function ProductManagement({
       <div className="mhv-card p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-[var(--primary)]">Quản lý sản phẩm</p>
-            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">Quản lý sản phẩm</p>
+            <h2 className="text-2xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
               Danh sách sản phẩm trong catalogue
             </h2>
-            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+            <p className="text-sm font-normal leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">
               Tìm kiếm nhanh theo tên hoặc mã sản phẩm, lọc nâng cao và thao tác thêm
               mới, chỉnh sửa bằng modal.
             </p>
@@ -153,7 +160,7 @@ export function ProductManagement({
           <button
             type="button"
             onClick={() => setIsCreateOpen(true)}
-            className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 ease-in-out"
+            className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
           >
             + Thêm sản phẩm
           </button>
@@ -167,13 +174,13 @@ export function ProductManagement({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Tìm tên sản phẩm, mã sản phẩm hoặc danh mục"
-            className="mhv-input text-sm"
+            className="mhv-input text-sm tracking-[0.4px]"
           />
 
           <button
             type="button"
             onClick={() => setShowAdvancedFilters((value) => !value)}
-            className="mhv-btn-secondary inline-flex rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ease-in-out"
+            className="mhv-btn-secondary inline-flex px-4 py-3 text-sm font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
           >
             {showAdvancedFilters ? "Ẩn bộ lọc nâng cao" : "Bộ lọc nâng cao"}
           </button>
@@ -182,13 +189,13 @@ export function ProductManagement({
         {showAdvancedFilters ? (
           <div className="mt-4 grid gap-4 border-t border-slate-200 pt-4 dark:border-slate-800 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              <span className="text-sm font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
                 Lọc theo loại
               </span>
               <select
                 value={categoryFilter}
                 onChange={(event) => setCategoryFilter(event.target.value)}
-                className="mhv-input text-sm"
+                className="mhv-input text-sm tracking-[0.4px]"
               >
                 <option value="all">Tất cả loại sản phẩm</option>
                 {categories.map((category) => (
@@ -200,7 +207,7 @@ export function ProductManagement({
             </label>
 
             <label className="space-y-2">
-              <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              <span className="text-sm font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
                 Lọc theo trạng thái khuyến mãi
               </span>
               <select
@@ -208,7 +215,7 @@ export function ProductManagement({
                 onChange={(event) =>
                   setPromotionFilter(event.target.value as PromotionFilter)
                 }
-                className="mhv-input text-sm"
+                className="mhv-input text-sm tracking-[0.4px]"
               >
                 <option value="all">Tất cả</option>
                 <option value="promotion">Đang khuyến mãi</option>
@@ -222,10 +229,10 @@ export function ProductManagement({
       <div className="mhv-card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <div>
-            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-lg font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
               Danh sách sản phẩm
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm font-normal text-slate-500 dark:text-slate-400 tracking-[0.4px]">
               Hiển thị {filteredProducts.length} / {products.length} sản phẩm
             </p>
           </div>
@@ -233,15 +240,15 @@ export function ProductManagement({
 
         <div className="overflow-x-auto">
           <table className="min-w-[1100px] divide-y divide-slate-200 text-sm dark:divide-slate-800">
-            <thead className="bg-slate-50 text-left text-slate-600 dark:bg-slate-900/70 dark:text-slate-300">
+            <thead className="bg-[var(--surface-muted)] text-left text-slate-600 dark:bg-slate-900/70 dark:text-slate-300">
               <tr>
-                <th className="px-6 py-4 font-semibold">Sản phẩm</th>
-                <th className="px-6 py-4 font-semibold">Mã SP</th>
-                <th className="px-6 py-4 font-semibold">Danh mục</th>
-                <th className="px-6 py-4 font-semibold">Giá</th>
-                <th className="px-6 py-4 font-semibold">Khuyến mãi</th>
-                <th className="px-6 py-4 font-semibold">Ngày tạo</th>
-                <th className="px-6 py-4 font-semibold text-right">Thao tác</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Sản phẩm</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Mã SP</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Danh mục</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Giá</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Khuyến mãi</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Ngày tạo</th>
+                <th className="px-6 py-4 font-normal text-right tracking-[0.4px]">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-950/40">
@@ -253,7 +260,7 @@ export function ProductManagement({
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-14 w-14 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-900">
+                        <div className="relative h-14 w-14 overflow-hidden border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-900">
                           <Image
                             src={product.imageUrl}
                             alt={product.name}
@@ -263,28 +270,28 @@ export function ProductManagement({
                           />
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate font-medium text-slate-900 dark:text-slate-100">
+                          <p className="truncate font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
                             {product.name}
                           </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          <p className="truncate text-xs font-normal text-slate-500 dark:text-slate-400 tracking-[0.4px]">
                             {product.specs || "Chưa có quy cách"}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300 tracking-[0.4px]">
                       {product.productCode}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300 tracking-[0.4px]">
                       {product.categoryName}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300 tracking-[0.4px]">
                       {(() => {
                         const primaryUnitPrice = getPrimaryUnitPrice(product.unitPrices);
 
                         if (!primaryUnitPrice) {
                           return (
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs font-normal text-slate-400 tracking-[0.4px]">
                               Chưa có đơn giá
                             </span>
                           );
@@ -292,14 +299,14 @@ export function ProductManagement({
 
                         return (
                           <>
-                            <p className="font-semibold text-slate-900 dark:text-slate-100">
+                            <p className="font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
                               {formatCurrencyPerUnit(
                                 primaryUnitPrice.price,
                                 primaryUnitPrice.label,
                               )}
                             </p>
                             {primaryUnitPrice.discountPrice ? (
-                              <p className="text-xs text-[var(--primary)]">
+                              <p className="text-xs font-normal text-[var(--foreground)] tracking-[0.4px]">
                                 KM:{" "}
                                 {formatCurrencyPerUnit(
                                   primaryUnitPrice.discountPrice,
@@ -313,7 +320,7 @@ export function ProductManagement({
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        className={`inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] ${
                           product.isPromotion
                             ? "mhv-chip"
                             : "bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-300"
@@ -322,7 +329,7 @@ export function ProductManagement({
                         {product.isPromotion ? "Đang khuyến mãi" : "Bình thường"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
+                    <td className="px-6 py-4 text-slate-600 dark:text-slate-300 tracking-[0.4px]">
                       {dateFormatter.format(new Date(product.createdAt))}
                     </td>
                     <td className="px-6 py-4">
@@ -330,7 +337,7 @@ export function ProductManagement({
                         <button
                           type="button"
                           onClick={() => setEditingProduct(product)}
-                          className="mhv-btn-secondary inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition-all duration-200 ease-in-out"
+                          className="mhv-btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
                         >
                           <PencilIcon />
                           Chỉnh sửa
@@ -338,7 +345,7 @@ export function ProductManagement({
                         <button
                           type="button"
                           onClick={() => setDeletingProduct(product)}
-                          className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition-all duration-200 ease-in-out hover:bg-red-50"
+                          className="inline-flex items-center gap-2 border border-[var(--border)] bg-white px-3 py-2 text-xs font-normal text-red-600 transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
                         >
                           <TrashIcon />
                           Xóa
@@ -351,7 +358,7 @@ export function ProductManagement({
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400"
+                    className="px-6 py-10 text-center text-sm font-normal text-slate-500 dark:text-slate-400 tracking-[0.4px]"
                   >
                     Không tìm thấy sản phẩm phù hợp.
                   </td>

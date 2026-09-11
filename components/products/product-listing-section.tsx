@@ -1,6 +1,9 @@
-import Link from "next/link";
+"use client";
 
-import { CategoryFilter } from "@/components/products/category-filter";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+
+import { ProductAdvancedFilter } from "@/components/products/product-advanced-filter";
 import { ProductCard } from "@/components/products/product-card";
 import { ProductEmptyState } from "@/components/products/product-empty-state";
 
@@ -34,6 +37,7 @@ type ProductListingSectionProps = {
   categories: ListingCategory[];
   products: ListingProduct[];
   selectedCategory?: string;
+  selectedCategories?: string[];
   selectedCategoryName?: string;
   basePath?: string;
   countLabel?: string;
@@ -43,6 +47,8 @@ type ProductListingSectionProps = {
   sortOption?: "newest" | "price-asc" | "price-desc";
   enableSearchAndFilter?: boolean;
   showPromotionFilter?: boolean;
+  minPrice?: string;
+  maxPrice?: string;
 };
 
 export function ProductListingSection({
@@ -52,6 +58,7 @@ export function ProductListingSection({
   categories,
   products,
   selectedCategory,
+  selectedCategories = [],
   selectedCategoryName,
   basePath = "/products",
   countLabel = "sản phẩm",
@@ -61,127 +68,147 @@ export function ProductListingSection({
   sortOption = "newest",
   enableSearchAndFilter = false,
   showPromotionFilter = true,
+  minPrice = "",
+  maxPrice = "",
 }: ProductListingSectionProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const promotionOnly = promotionFilter === "promotion";
+
+  function handleSortChange(value: "newest" | "price-asc" | "price-desc") {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (value === "newest") {
+      params.delete("sort");
+    } else {
+      params.set("sort", value);
+    }
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
+  }
+
+  const resolvedSelectedCategories = useMemo(() => {
+    if (selectedCategories.length > 0) return selectedCategories;
+    return selectedCategory ? [selectedCategory] : [];
+  }, [selectedCategories, selectedCategory]);
+
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 lg:space-y-8">
       <div className="mhv-card p-6 sm:p-8">
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-[var(--primary)]">{badge}</p>
-          <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl dark:text-slate-100">{title}</h1>
-          <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-400">
+          <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">{badge}</p>
+          <h1 className="text-3xl font-normal text-slate-900 sm:text-4xl dark:text-slate-100 tracking-[0.4px]">{title}</h1>
+          <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-400 tracking-[0.4px]">
             {description}
           </p>
         </div>
       </div>
 
       {enableSearchAndFilter ? (
-        <form action={basePath} className="mhv-card space-y-4 p-4 sm:p-6">
-          <div
-            className={`grid gap-4 ${
-              showPromotionFilter
-                ? "xl:grid-cols-[minmax(0,1fr)_220px_220px_auto]"
-                : "xl:grid-cols-[minmax(0,1fr)_220px_auto]"
-            }`}
-          >
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-[var(--primary)]">
-                Tìm kiếm sản phẩm
-              </span>
-              <input
-                type="search"
-                name="q"
-                defaultValue={searchQuery}
-                placeholder="Nhập tên sản phẩm, mã sản phẩm hoặc mô tả"
-                className="mhv-input text-sm"
-              />
-            </label>
+        <>
+          <div className="lg:hidden">
+            <ProductAdvancedFilter
+              categories={categories}
+              selectedCategories={resolvedSelectedCategories}
+              searchQuery={searchQuery}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              promotionOnly={promotionOnly}
+              showPromotionFilter={showPromotionFilter}
+              basePath={basePath}
+            />
+          </div>
 
-            {showPromotionFilter ? (
-              <label className="space-y-2">
-                <span className="text-sm font-semibold text-[var(--primary)]">Bộ lọc</span>
-                <select
-                  name="promotion"
-                  defaultValue={promotionFilter}
-                  className="mhv-input text-sm"
-                >
-                  <option value="all">Tất cả sản phẩm</option>
-                  <option value="promotion">Đang khuyến mãi</option>
-                  <option value="normal">Không khuyến mãi</option>
-                </select>
-              </label>
-            ) : null}
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+            <aside className="hidden w-[280px] shrink-0 lg:block lg:w-[300px]">
+              <div className="lg:sticky lg:top-4">
+                <ProductAdvancedFilter
+                  categories={categories}
+                  selectedCategories={resolvedSelectedCategories}
+                  searchQuery={searchQuery}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  promotionOnly={promotionOnly}
+                  showPromotionFilter={showPromotionFilter}
+                  basePath={basePath}
+                />
+              </div>
+            </aside>
 
-            <label className="space-y-2">
-              <span className="text-sm font-semibold text-[var(--primary)]">Sắp xếp</span>
-              <select
-                name="sort"
-                defaultValue={sortOption}
-                className="mhv-input text-sm"
-              >
-                <option value="newest">Mới nhất</option>
-                <option value="price-asc">Giá thấp đến cao</option>
-                <option value="price-desc">Giá cao đến thấp</option>
-              </select>
-            </label>
+            <main className="flex min-w-0 flex-1 flex-col gap-6">
+              <div className="mhv-card flex flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between md:gap-4">
+                <div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 tracking-[0.4px]">Kết quả hiển thị</p>
+                  <p className="text-lg font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+                    {products.length} {countLabel}
+                    {selectedCategoryName ? ` trong "${selectedCategoryName}"` : ""}
+                  </p>
+                </div>
+                <div className="flex w-full items-center gap-3 md:w-auto">
+                  <label className="flex w-full items-center gap-3 md:w-auto">
+                    <span className="whitespace-nowrap text-sm font-normal text-[var(--muted)] tracking-[0.4px]">
+                      Sắp xếp
+                    </span>
+                    <select
+                      value={sortOption}
+                      onChange={(e) =>
+                        handleSortChange(
+                          e.target.value as "newest" | "price-asc" | "price-desc",
+                        )
+                      }
+                      className="mhv-input w-full text-sm md:w-auto"
+                    >
+                      <option value="newest">Mới nhất</option>
+                      <option value="price-asc">Giá thấp đến cao</option>
+                      <option value="price-desc">Giá cao đến thấp</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row lg:items-end">
-              {selectedCategory ? (
-                <input type="hidden" name="category" value={selectedCategory} />
-              ) : null}
-
-              <button
-                type="submit"
-                className="mhv-btn-primary inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold"
-              >
-                Áp dụng
-              </button>
-              <Link
-                href={basePath}
-                className="mhv-btn-secondary inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold"
-              >
-                Xóa bộ lọc
-              </Link>
+              {products.length === 0 ? (
+                <ProductEmptyState
+                  selectedCategoryName={selectedCategoryName}
+                  resetHref={basePath}
+                  resetLabel={emptyResetLabel}
+                />
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {products.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
+            </main>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="mhv-card flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
+            <div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 tracking-[0.4px]">Kết quả hiển thị</p>
+              <p className="text-lg font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+                {products.length} {countLabel}
+                {selectedCategoryName ? ` trong "${selectedCategoryName}"` : ""}
+              </p>
             </div>
           </div>
-        </form>
-      ) : null}
 
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        basePath={basePath}
-        preservedParams={{
-          q: searchQuery || undefined,
-          promotion:
-            showPromotionFilter && promotionFilter && promotionFilter !== "all"
-              ? promotionFilter
-              : undefined,
-          sort: sortOption !== "newest" ? sortOption : undefined,
-        }}
-      />
-
-      <div className="mhv-card flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Kết quả hiển thị</p>
-          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            {products.length} {countLabel}
-            {selectedCategoryName ? ` trong "${selectedCategoryName}"` : ""}
-          </p>
-        </div>
-      </div>
-
-      {products.length === 0 ? (
-        <ProductEmptyState
-          selectedCategoryName={selectedCategoryName}
-          resetHref={basePath}
-          resetLabel={emptyResetLabel}
-        />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+          {products.length === 0 ? (
+            <ProductEmptyState
+              selectedCategoryName={selectedCategoryName}
+              resetHref={basePath}
+              resetLabel={emptyResetLabel}
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

@@ -50,44 +50,44 @@ export function AdminLoginForm() {
       onSubmit={handleSubmit}
     >
       <div className="space-y-2">
-        <p className="text-sm font-medium text-[var(--primary)]">Đăng nhập quản trị</p>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+        <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">Đăng nhập quản trị</p>
+        <h1 className="text-2xl font-normal text-[var(--foreground)] tracking-[0.4px]">
           Truy cập khu vực admin
         </h1>
-        <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+        <p className="text-sm font-normal leading-6 text-[var(--muted)] tracking-[0.4px]">
           Đăng nhập bằng tài khoản quản trị để thêm loại sản phẩm và sản phẩm mới.
         </p>
       </div>
 
       {errorMessage ? (
-        <div className="mhv-alert-danger rounded-xl p-4 text-sm">
+        <div className="mhv-alert-danger p-4 text-sm tracking-[0.4px]">
           {errorMessage}
         </div>
       ) : null}
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
           Username admin
         </span>
         <input
           type="text"
           value={username}
           onChange={(event) => setUsername(event.target.value)}
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
           placeholder="admin"
           required
         />
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+        <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
           Mật khẩu
         </span>
         <input
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="mhv-input text-sm"
+          className="mhv-input text-sm tracking-[0.4px]"
           placeholder="Nhập mật khẩu admin"
           required
         />
@@ -96,7 +96,7 @@ export function AdminLoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-70"
+        className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal transition-all duration-200 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70 tracking-[0.4px]"
       >
         {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
       </button>

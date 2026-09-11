@@ -19,11 +19,11 @@ export default async function AdminContactInfoPage() {
     <section className="space-y-6">
       <div className="mhv-card p-6">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-[var(--primary)]">Liên hệ & chi nhánh</p>
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">Liên hệ & chi nhánh</p>
+          <h2 className="text-2xl font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
             Quản lý thông tin liên hệ và nhiều địa chỉ showroom
           </h2>
-          <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+          <p className="text-sm font-normal leading-6 tracking-[0.4px] text-slate-600 dark:text-slate-400">
             Bạn có thể cập nhật liên hệ chính và thêm nhiều chi nhánh/showroom để hiển
             thị trên website.
           </p>
@@ -46,8 +46,8 @@ export default async function AdminContactInfoPage() {
 
         <div className="mhv-card p-6">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-[var(--primary)]">Danh sách địa chỉ</p>
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <p className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">Danh sách địa chỉ</p>
+            <h3 className="text-xl font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
               {companyInfo?.branches.length ?? 0} chi nhánh / showroom
             </h3>
           </div>
@@ -57,19 +57,19 @@ export default async function AdminContactInfoPage() {
               companyInfo.branches.map((branch) => (
                 <article
                   key={branch.id}
-                  className="rounded-2xl border border-slate-200 p-4 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800"
+                  className="border border-[var(--border)] p-4 transition-all duration-300 ease-in-out hover:opacity-70"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                        <h4 className="text-lg font-normal tracking-[0.4px] text-slate-900 dark:text-slate-100">
                           {branch.name}
                         </h4>
-                        <span className="mhv-chip px-3 py-1 text-xs font-semibold">
+                        <span className="mhv-chip px-3 py-1 text-xs font-normal tracking-[0.4px]">
                           {branch.isShowroom ? "Showroom" : "Chi nhánh"}
                         </span>
                       </div>
-                      <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+                      <p className="text-sm font-normal leading-6 tracking-[0.4px] text-slate-600 dark:text-slate-400">
                         {branch.address}
                       </p>
                     </div>
@@ -79,28 +79,28 @@ export default async function AdminContactInfoPage() {
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     <div className="mhv-muted-surface p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <p className="text-xs font-normal uppercase tracking-[0.4px] text-slate-500 dark:text-slate-400">
                         Điện thoại
                       </p>
-                      <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
+                      <p className="mt-1 text-sm font-normal tracking-[0.4px] text-slate-700 dark:text-slate-200">
                         {branch.phone || "Đang cập nhật"}
                       </p>
                     </div>
 
                     <div className="mhv-muted-surface p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <p className="text-xs font-normal uppercase tracking-[0.4px] text-slate-500 dark:text-slate-400">
                         Email
                       </p>
-                      <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
+                      <p className="mt-1 text-sm font-normal tracking-[0.4px] text-slate-700 dark:text-slate-200">
                         {branch.email || "Đang cập nhật"}
                       </p>
                     </div>
 
                     <div className="mhv-muted-surface p-3">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <p className="text-xs font-normal uppercase tracking-[0.4px] text-slate-500 dark:text-slate-400">
                         Thứ tự
                       </p>
-                      <p className="mt-1 text-sm text-slate-700 dark:text-slate-200">
+                      <p className="mt-1 text-sm font-normal tracking-[0.4px] text-slate-700 dark:text-slate-200">
                         {branch.sortOrder}
                       </p>
                     </div>
@@ -108,7 +108,7 @@ export default async function AdminContactInfoPage() {
                 </article>
               ))
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
+              <div className="border border-dashed border-[var(--border)] bg-[var(--surface-muted)] p-6 text-sm font-normal tracking-[0.4px] text-slate-600 dark:text-slate-400">
                 Chưa có chi nhánh hoặc showroom nào được thêm.
               </div>
             )}

@@ -92,116 +92,116 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
   }
 
   return (
-    <div className="mhv-card space-y-4 p-6 sm:p-8">
+    <div className="mhv-card space-y-6 p-6 sm:p-8">
       <div className="space-y-2">
-        <p className="text-sm font-medium text-[var(--primary)]">Biểu mẫu liên hệ</p>
-        <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+        <p className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">Biểu mẫu liên hệ</p>
+        <h2 className="text-2xl font-normal text-[var(--foreground)] tracking-[0.4px]">
           Gửi thông tin cho chúng tôi
         </h2>
-        <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+        <p className="text-sm leading-6 text-[var(--muted)] tracking-[0.4px]">
           Điền nhanh nhu cầu của bạn, đội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm
           nhất.
         </p>
       </div>
 
       {isSubmitted && submitMessage ? (
-        <div className="mhv-alert-success rounded-xl p-4 text-sm leading-6">
+        <div className="mhv-alert-success p-4 text-sm leading-6 tracking-[0.4px]">
           {submitMessage} Chúng tôi sẽ liên hệ lại sớm nhất có thể.
         </div>
       ) : null}
 
       {submitError ? (
-        <div className="mhv-alert-danger rounded-xl p-4 text-sm leading-6">
+        <div className="mhv-alert-danger p-4 text-sm leading-6 tracking-[0.4px]">
           {submitError}
         </div>
       ) : null}
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="grid gap-4 md:grid-cols-2">
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
               Họ và tên
             </span>
             <input
               type="text"
               value={formData.fullName}
               onChange={(event) => updateField("fullName", event.target.value)}
-              className="mhv-input text-sm"
+              className="mhv-input text-sm tracking-[0.4px]"
               placeholder="Nhập họ và tên"
               required
             />
             {errors.fullName ? (
-              <p className="text-sm text-red-600">{errors.fullName}</p>
+              <p className="text-sm text-red-600 tracking-[0.4px]">{errors.fullName}</p>
             ) : null}
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
               Số điện thoại
             </span>
             <input
               type="tel"
               value={formData.phone}
               onChange={(event) => updateField("phone", event.target.value)}
-              className="mhv-input text-sm"
+              className="mhv-input text-sm tracking-[0.4px]"
               placeholder="Nhập số điện thoại"
               required
             />
-            {errors.phone ? <p className="text-sm text-red-600">{errors.phone}</p> : null}
+            {errors.phone ? <p className="text-sm text-red-600 tracking-[0.4px]">{errors.phone}</p> : null}
           </label>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
               Email
             </span>
             <input
               type="email"
               value={formData.email}
               onChange={(event) => updateField("email", event.target.value)}
-              className="mhv-input text-sm"
+              className="mhv-input text-sm tracking-[0.4px]"
               placeholder="Nhập địa chỉ email"
               required
             />
-            {errors.email ? <p className="text-sm text-red-600">{errors.email}</p> : null}
+            {errors.email ? <p className="text-sm text-red-600 tracking-[0.4px]">{errors.email}</p> : null}
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
               Sản phẩm quan tâm
             </span>
             <input
               type="text"
               value={formData.productInterest}
               onChange={(event) => updateField("productInterest", event.target.value)}
-              className="mhv-input text-sm"
+              className="mhv-input text-sm tracking-[0.4px]"
               placeholder="Ví dụ: Gạch ốp lát 600x600"
             />
             {errors.productInterest ? (
-              <p className="text-sm text-red-600">{errors.productInterest}</p>
+              <p className="text-sm text-red-600 tracking-[0.4px]">{errors.productInterest}</p>
             ) : null}
           </label>
         </div>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
             Nội dung cần tư vấn
           </span>
           <textarea
             value={formData.message}
             onChange={(event) => updateField("message", event.target.value)}
-            className="mhv-input min-h-32 text-sm"
+            className="mhv-input min-h-32 text-sm tracking-[0.4px]"
             placeholder="Mô tả nhu cầu của bạn để chúng tôi tư vấn chính xác hơn"
             required
           />
-          {errors.message ? <p className="text-sm text-red-600">{errors.message}</p> : null}
+          {errors.message ? <p className="text-sm text-red-600 tracking-[0.4px]">{errors.message}</p> : null}
         </label>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md"
+          className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal transition-all duration-300 ease-in-out hover:opacity-70 tracking-[0.4px]"
         >
           {isSubmitting ? "Đang gửi yêu cầu..." : "Gửi yêu cầu tư vấn"}
         </button>

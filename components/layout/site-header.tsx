@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import LogoTS from "@/components/logo/LogoTS";
 
 const navItems = [
   { href: "/", label: "Trang chủ" },
@@ -26,8 +27,8 @@ function HamburgerIcon() {
       <path
         d="M4 7h16M4 12h16M4 17h16"
         stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="butt"
       />
     </svg>
   );
@@ -39,22 +40,36 @@ function CloseIcon() {
       <path
         d="M6 6l12 12M18 6 6 18"
         stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
+        strokeWidth="1.5"
+        strokeLinecap="butt"
       />
     </svg>
   );
 }
 
-function ChevronDownIcon() {
+function SearchIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+      <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.5" />
       <path
-        d="m6 9 6 6 6-6"
+        d="m20 20-3.5-3.5"
         stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeWidth="1.5"
+        strokeLinecap="butt"
+      />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M4 20c1.5-3.5 4.5-5.5 8-5.5s6.5 2 8 5.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="butt"
       />
     </svg>
   );
@@ -63,16 +78,29 @@ function ChevronDownIcon() {
 export function SiteHeader({ companyName, session }: SiteHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserOpen, setIsUserOpen] = useState(false);
   const isAdmin = session?.role === "admin";
   const hasSession = Boolean(session);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   async function handleLogout() {
     await fetch("/api/admin/logout", {
       method: "POST",
     });
 
-    setIsMobileMenuOpen(false);
+    setIsMenuOpen(false);
+    setIsUserOpen(false);
     router.refresh();
   }
 
@@ -80,126 +108,148 @@ export function SiteHeader({ companyName, session }: SiteHeaderProps) {
     if (href === "/") {
       return pathname === "/";
     }
-
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
-  const desktopNav = (
-    <nav className="hidden items-center gap-2 text-sm font-medium text-slate-600 lg:flex dark:text-slate-300">
-      {navItems.map((item) => {
-        const isActive = isNavItemActive(item.href);
-
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`rounded-full border px-4 py-2.5 transition-all duration-200 ease-in-out ${
-              isActive
-                ? "border-2 border-[#F27025] bg-[#fef0ea] text-[#F27025] shadow-sm dark:border-[#F27025] dark:bg-[#fef0ea] dark:text-[#F27025]"
-                : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-[color:color-mix(in_srgb,var(--primary)_35%,white)] hover:text-[var(--primary)] hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-[color:color-mix(in_srgb,var(--primary)_35%,black)]"
-            }`}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  const displayName = (companyName || "Digital Catalogue")
+    .toUpperCase()
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(" ");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[color:color-mix(in_srgb,var(--card)_92%,transparent)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color:color-mix(in_srgb,var(--card)_86%,transparent)] dark:border-slate-800/80">
-      <div className="mx-auto flex max-w-7xl items-start justify-between gap-4 px-4 py-4 sm:px-6 lg:gap-6 lg:px-8">
-        <div className="flex-1 space-y-1 lg:max-w-[28rem] xl:max-w-[30rem]">
-          <span className="inline-flex rounded-full border border-[color:color-mix(in_srgb,var(--primary)_25%,white)] bg-[color:color-mix(in_srgb,var(--primary)_10%,white)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-            Vật liệu xây dựng
-          </span>
-          <Link
-            href="/"
-            className="block text-xl font-bold tracking-tight text-slate-900 transition-all duration-200 ease-in-out hover:text-[var(--primary)] sm:text-2xl dark:text-slate-100"
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]">
+      <div className="w-full border-b border-[var(--border)] px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(true)}
+            className="inline-flex h-11 w-11 items-center justify-center text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+            aria-label="Mở menu"
+            aria-expanded={isMenuOpen}
           >
-            {companyName || "Digital Catalogue"}
+            <HamburgerIcon />
+            <span className="ml-2 hidden text-sm font-normal tracking-[0.4px] sm:inline">
+              Menu
+            </span>
+          </button>
+
+          <Link href="/" className="flex flex-1 items-center justify-center transition-all duration-300 ease-in-out hover:opacity-70">
+            <LogoTS className="h-10 w-auto text-[var(--foreground)] sm:h-12 lg:h-14" />
+            <span className="sr-only">{displayName}</span>
           </Link>
-          <p className="max-w-xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Catalogue điện tử hiện đại cho gạch men, ngói và thiết bị vệ sinh với trải
-            nghiệm tra cứu rõ ràng, tin cậy.
-          </p>
-        </div>
 
-        <div className="hidden shrink-0 lg:flex lg:flex-col lg:items-end lg:gap-3 xl:flex-row xl:items-center xl:gap-2">
-          {desktopNav}
-
-          {!hasSession ? (
+          <div className="flex items-center gap-2">
             <Link
-              href="/admin/login"
-              className="mhv-btn-primary rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-sm"
+              href="/products"
+              className="hidden h-11 w-11 items-center justify-center text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70 sm:inline-flex"
+              aria-label="Tìm kiếm"
             >
-              Đăng nhập
+              <SearchIcon />
             </Link>
-          ) : (
-            <div className="group relative">
-              <button
-                type="button"
-                className="mhv-btn-secondary inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-sm"
+
+            {!hasSession ? (
+              <Link
+                href="/admin/login"
+                className="inline-flex h-11 items-center gap-2 px-3 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
               >
-                <span>{session?.username}</span>
-                <ChevronDownIcon />
-              </button>
+                <UserIcon />
+                <span className="hidden sm:inline">Đăng nhập</span>
+              </Link>
+            ) : (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsUserOpen((value) => !value)}
+                  className="inline-flex h-11 items-center gap-2 px-3 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+                >
+                  <UserIcon />
+                  <span className="hidden sm:inline">{session?.username}</span>
+                </button>
 
-              <div className="invisible absolute right-0 top-[calc(100%+0.75rem)] z-50 w-56 translate-y-2 opacity-0 transition-all duration-200 ease-in-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                <div className="mhv-card overflow-hidden p-2">
-                  {isAdmin ? (
-                    <Link
-                      href="/admin/products"
-                      className="flex rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition-all duration-200 ease-in-out hover:bg-[#fef0ea] hover:text-[#F27025] dark:text-slate-200 dark:hover:bg-orange-500/10 dark:hover:text-[#F27025]"
-                    >
-                      Trang quản trị
-                    </Link>
-                  ) : (
-                    <div className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      Guest
+                {isUserOpen ? (
+                  <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-56 border border-[var(--border)] bg-[var(--card)] shadow-none lv-fade-in">
+                    <div className="flex flex-col">
+                      <div className="border-b border-[var(--border)] px-4 py-3 text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
+                        {session?.username}
+                      </div>
+                      {isAdmin ? (
+                        <Link
+                          href="/admin/products"
+                          onClick={() => setIsUserOpen(false)}
+                          className="px-4 py-3 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70 hover:bg-[var(--surface-muted)]"
+                        >
+                          Trang quản trị
+                        </Link>
+                      ) : (
+                        <div className="px-4 py-3 text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
+                          Guest
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="px-4 py-3 text-left text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70 hover:bg-[var(--surface-muted)]"
+                      >
+                        Đăng xuất
+                      </button>
                     </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="flex w-full rounded-xl px-4 py-3 text-left text-sm font-semibold text-rose-600 transition-all duration-200 ease-in-out hover:bg-rose-50 dark:hover:bg-rose-500/10"
-                  >
-                    Đăng xuất
-                  </button>
-                </div>
+                  </div>
+                ) : null}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setIsMobileMenuOpen((value) => !value)}
-          className="mhv-btn-secondary inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl lg:hidden"
-          aria-label={isMobileMenuOpen ? "Đóng menu" : "Mở menu"}
-          aria-expanded={isMobileMenuOpen}
-        >
-          {isMobileMenuOpen ? <CloseIcon /> : <HamburgerIcon />}
-        </button>
       </div>
 
-      {isMobileMenuOpen ? (
-        <div className="border-t border-slate-200 px-4 pb-4 pt-3 sm:px-6 lg:hidden dark:border-slate-800">
-          <div className="mx-auto flex max-w-7xl flex-col gap-3">
-            <nav className="grid gap-3">
+      <div className="border-b border-[var(--border)] px-4 py-3 sm:px-6 lg:px-8 lg:hidden">
+        <Link
+          href="/products"
+          className="flex items-center gap-3 border border-[var(--border)] px-4 py-2.5 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+        >
+          <SearchIcon />
+          <span>Tìm sản phẩm...</span>
+        </Link>
+      </div>
+
+      {isMenuOpen ? (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:bg-black/40"
+            onClick={() => setIsMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed z-[51] bg-[var(--background)] border-[var(--border)] left-0 right-0 top-0 max-h-[85vh] w-full overflow-y-auto border-b lv-menu-slide-enter lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:max-h-none lg:w-[380px] lg:max-w-[85vw] lg:border-b-0 lg:border-r">
+            <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4 sm:px-6">
+              <button
+                type="button"
+                onClick={() => setIsMenuOpen(false)}
+                className="inline-flex h-11 items-center gap-2 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+                aria-label="Đóng menu"
+              >
+                <CloseIcon />
+                <span className="ml-2">Đóng</span>
+              </button>
+              <Link href="/" onClick={() => setIsMenuOpen(false)} className="transition-all duration-300 ease-in-out hover:opacity-70">
+                <LogoTS className="h-8 w-auto text-[var(--foreground)] sm:h-10" />
+                <span className="sr-only">{displayName}</span>
+              </Link>
+              <div className="w-16" />
+            </div>
+
+            <nav className="flex flex-col px-4 py-4 sm:px-6">
               {navItems.map((item) => {
                 const isActive = isNavItemActive(item.href);
-
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition-all duration-200 ease-in-out ${
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`border-b border-[var(--border)] py-4 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
                       isActive
-                        ? "border-2 border-[#F27025] bg-[#fef0ea] text-[#F27025] shadow-sm dark:border-[#F27025] dark:bg-[#fef0ea] dark:text-[#F27025]"
-                        : "border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                        ? "text-[var(--foreground)]"
+                        : "text-[var(--foreground)]"
                     }`}
                   >
                     {item.label}
@@ -208,45 +258,43 @@ export function SiteHeader({ companyName, session }: SiteHeaderProps) {
               })}
             </nav>
 
-            {!hasSession ? (
-              <Link
-                href="/admin/login"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="mhv-btn-primary inline-flex w-full justify-center rounded-2xl px-4 py-3 text-sm font-semibold"
-              >
-                Đăng nhập
-              </Link>
-            ) : (
-              <div className="mhv-card space-y-2 p-3">
-                <div className="rounded-xl bg-[#fef0ea] px-4 py-3 text-sm font-semibold text-[#F27025]">
-                  {session?.username}
-                </div>
-
-                {isAdmin ? (
+            <div className="border-t border-[var(--border)] px-4 py-4 sm:px-6">
+              <div className="flex flex-col gap-3">
+                <p className="text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
+                  Hỗ trợ khách hàng
+                </p>
+                {!hasSession ? (
                   <Link
-                    href="/admin/products"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="mhv-btn-secondary inline-flex w-full justify-center rounded-2xl px-4 py-3 text-sm font-semibold"
+                    href="/admin/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="lv-solid-primary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
                   >
-                    Trang quản trị
+                    Đăng nhập
                   </Link>
                 ) : (
-                  <div className="mhv-btn-secondary inline-flex w-full justify-center rounded-2xl px-4 py-3 text-sm font-semibold">
-                    Guest
-                  </div>
+                  <>
+                    {isAdmin ? (
+                      <Link
+                        href="/admin/products"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="lv-solid-primary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
+                      >
+                        Trang quản trị
+                      </Link>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="mhv-btn-secondary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
+                    >
+                      Đăng xuất
+                    </button>
+                  </>
                 )}
-
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="inline-flex w-full justify-center rounded-2xl border border-rose-200 bg-white px-4 py-3 text-sm font-semibold text-rose-600 transition-all duration-200 ease-in-out hover:bg-rose-50 dark:border-rose-500/20 dark:bg-slate-900 dark:hover:bg-rose-500/10"
-                >
-                  Đăng xuất
-                </button>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        </>
       ) : null}
     </header>
   );

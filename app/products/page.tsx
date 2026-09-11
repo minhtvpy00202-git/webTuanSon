@@ -5,24 +5,57 @@ import { prisma } from "@/lib/prisma";
 type ProductsPageProps = {
   searchParams?: Promise<{
     category?: string;
+    categories?: string;
     q?: string;
-    promotion?: "all" | "promotion" | "normal";
+    promotion?: "all" | "promotion" | "normal" | "1";
     sort?: "newest" | "price-asc" | "price-desc";
+    minPrice?: string;
+    maxPrice?: string;
   }>;
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const selectedCategory = resolvedSearchParams?.category;
+  const singleCategory = resolvedSearchParams?.category;
+  const categoriesParam = resolvedSearchParams?.categories;
+  const selectedCategories = categoriesParam
+    ? categoriesParam
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : singleCategory
+      ? [singleCategory]
+      : [];
   const searchQuery = resolvedSearchParams?.q?.trim() ?? "";
-  const promotionFilter = resolvedSearchParams?.promotion ?? "all";
+  const promotionRaw = resolvedSearchParams?.promotion ?? "all";
+  const promotionFilter =
+    promotionRaw === "1"
+      ? ("promotion" as const)
+      : (promotionRaw as "all" | "promotion" | "normal");
   const sortOption = resolvedSearchParams?.sort ?? "newest";
+  const minPriceRaw = resolvedSearchParams?.minPrice?.trim() ?? "";
+  const maxPriceRaw = resolvedSearchParams?.maxPrice?.trim() ?? "";
+  const minPriceNum = minPriceRaw ? Number(minPriceRaw) : null;
+  const maxPriceNum = maxPriceRaw ? Number(maxPriceRaw) : null;
+
+  const unitPriceConditions: Record<string, unknown> = {
+    categoryUnit: { isDefault: true },
+  };
+  if (minPriceNum !== null && !Number.isNaN(minPriceNum)) {
+    unitPriceConditions.price = { ...(unitPriceConditions.price as object ?? {}), gte: minPriceNum };
+  }
+  if (maxPriceNum !== null && !Number.isNaN(maxPriceNum)) {
+    unitPriceConditions.price = { ...(unitPriceConditions.price as object ?? {}), lte: maxPriceNum };
+  }
+  const hasUnitPriceFilter =
+    (minPriceNum !== null && !Number.isNaN(minPriceNum)) ||
+    (maxPriceNum !== null && !Number.isNaN(maxPriceNum));
 
   const whereClause = {
-    ...(selectedCategory
+    ...(selectedCategories.length > 0
       ? {
           category: {
-            slug: selectedCategory,
+            slug: { in: selectedCategories },
           },
         }
       : {}),
@@ -31,6 +64,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       : promotionFilter === "normal"
         ? { isPromotion: false }
         : {}),
+    ...(hasUnitPriceFilter
+      ? {
+          unitPrices: {
+            some: unitPriceConditions,
+          },
+        }
+      : {}),
     ...(searchQuery
       ? {
           OR: [
@@ -115,9 +155,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     }),
   ]);
 
-  const selectedCategoryName = categories.find(
-    (category) => category.slug === selectedCategory,
-  )?.name;
+  const selectedCategoryName =
+    selectedCategories.length === 1
+      ? categories.find((category) => category.slug === selectedCategories[0])?.name
+      : selectedCategories.length > 1
+        ? `${selectedCategories.length} nhóm`
+        : undefined;
 
   return (
     <ProductListingSection
@@ -130,12 +173,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         slug: category.slug,
         productCount: category._count.products,
       }))}
-      selectedCategory={selectedCategory}
+      selectedCategory={selectedCategories.length === 1 ? selectedCategories[0] : undefined}
+      selectedCategories={selectedCategories}
       selectedCategoryName={selectedCategoryName}
       searchQuery={searchQuery}
       promotionFilter={promotionFilter}
       sortOption={sortOption}
       enableSearchAndFilter
+      minPrice={minPriceRaw}
+      maxPrice={maxPriceRaw}
       products={products.map((product) => {
         const resolvedUnitPrices = resolveUnitPrices(
           product.category.units.map((unit) => ({

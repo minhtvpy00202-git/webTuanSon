@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import LogoTS from "@/components/logo/LogoTS";
 import { AdminLoginForm } from "@/components/admin/admin-login-form";
 import { getAdminSession } from "@/lib/admin-auth";
 
@@ -14,14 +15,15 @@ export default async function AdminLoginPage() {
     <section className="mx-auto max-w-xl space-y-6 py-8">
       <div className="mhv-card p-6 sm:p-8">
         <div className="space-y-3">
-          <p className="text-sm font-medium text-[var(--primary)]">Khu vực quản trị</p>
-          <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
+          <LogoTS className="mx-auto h-12 w-auto text-[var(--foreground)] mb-3" />
+          <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px] text-center">Khu vực quản trị</p>
+          <h1 className="text-3xl font-normal text-[var(--foreground)] tracking-[0.4px]">
             Đăng nhập để quản lý catalogue
           </h1>
-          <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">
+          <p className="text-sm font-normal leading-7 text-[var(--muted)] tracking-[0.4px]">
             Sau khi đăng nhập bằng username quản trị, bạn có thể tạo loại sản phẩm mới,
             thêm sản phẩm và upload ảnh trực tiếp lên Supabase Storage bucket{" "}
-            <span className="font-semibold">Product</span>.
+            <span className="font-normal tracking-[0.4px]">Product</span>.
           </p>
         </div>
       </div>

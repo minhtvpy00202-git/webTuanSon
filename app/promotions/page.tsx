@@ -5,25 +5,60 @@ import { prisma } from "@/lib/prisma";
 type PromotionsPageProps = {
   searchParams?: Promise<{
     category?: string;
+    categories?: string;
     q?: string;
-    promotion?: "all" | "promotion" | "normal";
     sort?: "newest" | "price-asc" | "price-desc";
+    minPrice?: string;
+    maxPrice?: string;
   }>;
 };
 
 export default async function PromotionsPage({ searchParams }: PromotionsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const selectedCategory = resolvedSearchParams?.category;
+  const singleCategory = resolvedSearchParams?.category;
+  const categoriesParam = resolvedSearchParams?.categories;
+  const selectedCategories = categoriesParam
+    ? categoriesParam
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : singleCategory
+      ? [singleCategory]
+      : [];
   const searchQuery = resolvedSearchParams?.q?.trim() ?? "";
-  const promotionFilter = "promotion";
+  const promotionFilter = "promotion" as const;
   const sortOption = resolvedSearchParams?.sort ?? "newest";
+  const minPriceRaw = resolvedSearchParams?.minPrice?.trim() ?? "";
+  const maxPriceRaw = resolvedSearchParams?.maxPrice?.trim() ?? "";
+  const minPriceNum = minPriceRaw ? Number(minPriceRaw) : null;
+  const maxPriceNum = maxPriceRaw ? Number(maxPriceRaw) : null;
+
+  const unitPriceConditions: Record<string, unknown> = {
+    categoryUnit: { isDefault: true },
+  };
+  if (minPriceNum !== null && !Number.isNaN(minPriceNum)) {
+    unitPriceConditions.price = { ...(unitPriceConditions.price as object ?? {}), gte: minPriceNum };
+  }
+  if (maxPriceNum !== null && !Number.isNaN(maxPriceNum)) {
+    unitPriceConditions.price = { ...(unitPriceConditions.price as object ?? {}), lte: maxPriceNum };
+  }
+  const hasUnitPriceFilter =
+    (minPriceNum !== null && !Number.isNaN(minPriceNum)) ||
+    (maxPriceNum !== null && !Number.isNaN(maxPriceNum));
 
   const whereClause = {
     isPromotion: true,
-    ...(selectedCategory
+    ...(selectedCategories.length > 0
       ? {
           category: {
-            slug: selectedCategory,
+            slug: { in: selectedCategories },
+          },
+        }
+      : {}),
+    ...(hasUnitPriceFilter
+      ? {
+          unitPrices: {
+            some: unitPriceConditions,
           },
         }
       : {}),
@@ -115,9 +150,12 @@ export default async function PromotionsPage({ searchParams }: PromotionsPagePro
     }),
   ]);
 
-  const selectedCategoryName = categories.find(
-    (category) => category.slug === selectedCategory,
-  )?.name;
+  const selectedCategoryName =
+    selectedCategories.length === 1
+      ? categories.find((category) => category.slug === selectedCategories[0])?.name
+      : selectedCategories.length > 1
+        ? `${selectedCategories.length} nhóm`
+        : undefined;
 
   return (
     <ProductListingSection
@@ -163,7 +201,8 @@ export default async function PromotionsPage({ searchParams }: PromotionsPagePro
           },
         };
       })}
-      selectedCategory={selectedCategory}
+      selectedCategory={selectedCategories.length === 1 ? selectedCategories[0] : undefined}
+      selectedCategories={selectedCategories}
       selectedCategoryName={selectedCategoryName}
       basePath="/promotions"
       emptyResetLabel="Xem tất cả khuyến mãi"
@@ -172,6 +211,8 @@ export default async function PromotionsPage({ searchParams }: PromotionsPagePro
       sortOption={sortOption}
       enableSearchAndFilter
       showPromotionFilter={false}
+      minPrice={minPriceRaw}
+      maxPrice={maxPriceRaw}
     />
   );
 }

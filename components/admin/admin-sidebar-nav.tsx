@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LogoTS from "@/components/logo/LogoTS";
 
 type NavItem = {
   href: string;
@@ -21,6 +22,10 @@ export function AdminSidebarNav({ items }: AdminSidebarNavProps) {
 
   return (
     <nav className="flex flex-col gap-2">
+      <div className="mb-6 flex flex-col items-center gap-2 border-b border-[var(--border)] pb-5">
+        <LogoTS className="h-10 w-auto text-[var(--foreground)]" />
+        <p className="text-xs font-normal tracking-[0.4px] text-[var(--muted)] text-center">Quản trị nội dung</p>
+      </div>
       {items.map((item) => {
         const active = isActive(item.href);
 
@@ -28,10 +33,10 @@ export function AdminSidebarNav({ items }: AdminSidebarNavProps) {
           <Link
             key={item.href}
             href={item.href}
-            className={`rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200 ease-in-out ${
+            className={`px-4 py-3 text-sm font-normal transition-all duration-200 ease-in-out tracking-[0.4px] ${
               active
-                ? "border-2 border-[#F27025] bg-[#fef0ea] text-[#F27025] shadow-sm dark:border-[#F27025] dark:bg-[#fef0ea] dark:text-[#F27025]"
-                : "border border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-orange-300 hover:text-[var(--primary)] hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                ? "border border-[var(--foreground)] bg-[var(--surface-muted)] text-[var(--foreground)]"
+                : "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:opacity-70"
             }`}
           >
             {item.label}

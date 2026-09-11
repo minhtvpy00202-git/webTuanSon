@@ -39,6 +39,7 @@ model CompanyInfo {
   zaloLink    String?
   address     String
   branches    CompanyBranch[]
+  heroSlides  HeroSlide[]
 
   @@map("company_info")
 }
@@ -99,11 +100,27 @@ model Product {
   createdAt     DateTime           @default(now())
   category      Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   unitPrices    ProductUnitPrice[]
+  images        ProductImage[]
 
   @@index([categoryId])
   @@index([isPromotion])
   @@index([createdAt])
   @@map("products")
+}
+
+model ProductImage {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  imageUrl   String
+  storagePath String?
+  isMain     Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@unique([productId, imageUrl])
+  @@map("product_images")
 }
 
 model CategoryUnit {
@@ -133,4 +150,21 @@ model ProductUnitPrice {
   @@index([productId])
   @@index([categoryUnitId])
   @@map("product_unit_prices")
+}
+
+model HeroSlide {
+  id          Int         @id @default(autoincrement())
+  companyInfoId Int       @default(1)
+  imageUrl    String
+  storagePath String?
+  sortOrder   Int         @default(0)
+  heading     String?
+  subheading  String?
+  ctaText     String?
+  ctaLink     String?
+  createdAt   DateTime    @default(now())
+  companyInfo CompanyInfo @relation(fields: [companyInfoId], references: [id], onDelete: Cascade)
+
+  @@index([companyInfoId, sortOrder])
+  @@map("hero_slides")
 }
