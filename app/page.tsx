@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ProductCard } from "@/components/products/product-card";
+import { RevealOnScroll } from "@/components/ui/reveal-on-scroll";
 import { getCompanyInfoWithBranches } from "@/lib/company";
 import { prisma } from "@/lib/prisma";
 import { HomeHeroCarousel } from "@/components/home/home-hero-carousel";
@@ -112,76 +113,100 @@ export default async function HomePage() {
       />
 
       <div className="max-w-full px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <span className="inline-flex border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
-              Sản phẩm mới
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
-              Mẫu vật liệu mới nhất
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 tracking-[0.4px]">
-              Cập nhật các dòng sản phẩm mới nhất cho công trình hiện đại và bền vững.
-            </p>
+        <RevealOnScroll>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-flex border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
+                Sản phẩm mới
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+                Mẫu vật liệu mới nhất
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+                Cập nhật các dòng sản phẩm mới nhất cho công trình hiện đại và bền vững.
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px] transition-opacity duration-300 ease-in-out hover:opacity-70"
+            >
+              Xem tất cả →
+            </Link>
           </div>
-          <Link
-            href="/products"
-            className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px] transition-opacity duration-300 ease-in-out hover:opacity-70"
-          >
-            Xem tất cả →
-          </Link>
-        </div>
+        </RevealOnScroll>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {newestCards.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {newestCards.map((product, idx) => (
+            <RevealOnScroll
+              key={product.id}
+              variant="item"
+              staggerIndex={idx}
+              className="h-full"
+            >
+              <ProductCard product={product} />
+            </RevealOnScroll>
           ))}
         </div>
       </div>
 
       <div className="max-w-full px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-2">
-            <span className="inline-flex border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
-              Sản phẩm khuyến mãi
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
-              Ưu đãi đang diễn ra
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 tracking-[0.4px]">
-              Các sản phẩm đang có chương trình khuyến mãi đặc biệt, tiết kiệm chi phí tối ưu.
-            </p>
+        <RevealOnScroll delay={100}>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="space-y-2">
+              <span className="inline-flex border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
+                Sản phẩm khuyến mãi
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+                Ưu đãi đang diễn ra
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+                Các sản phẩm đang có chương trình khuyến mãi đặc biệt, tiết kiệm chi phí tối ưu.
+              </p>
+            </div>
+            <Link
+              href="/promotions"
+              className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px] transition-opacity duration-300 ease-in-out hover:opacity-70"
+            >
+              Xem khuyến mãi →
+            </Link>
           </div>
-          <Link
-            href="/promotions"
-            className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px] transition-opacity duration-300 ease-in-out hover:opacity-70"
-          >
-            Xem khuyến mãi →
-          </Link>
-        </div>
+        </RevealOnScroll>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {promotionCards.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {promotionCards.map((product, idx) => (
+            <RevealOnScroll
+              key={product.id}
+              variant="item"
+              staggerIndex={idx}
+              className="h-full"
+            >
+              <ProductCard product={product} />
+            </RevealOnScroll>
           ))}
         </div>
       </div>
 
       <div className="max-w-full px-4 sm:px-6 lg:px-8 pb-8">
         <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
-          {quickLinks.map((item) => (
-            <Link
+          {quickLinks.map((item, idx) => (
+            <RevealOnScroll
               key={item.href}
-              href={item.href}
-              className="mhv-card p-6 transition-all duration-300 ease-in-out hover:opacity-70"
+              variant="item"
+              staggerIndex={idx}
+              className="h-full"
             >
-              <h2 className="text-lg font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
-                {item.title}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">
-                {item.description}
-              </p>
-            </Link>
+              <Link
+                href={item.href}
+                className="mhv-card flex h-full flex-col p-6 transition-all duration-300 ease-in-out hover:opacity-70"
+              >
+                <h2 className="text-lg font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">
+                  {item.title}
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+                  {item.description}
+                </p>
+              </Link>
+            </RevealOnScroll>
           ))}
         </div>
       </div>
