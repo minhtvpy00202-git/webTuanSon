@@ -32,3 +32,5 @@
 .env.development.local
 .env.test.local
 .env.production.local
+UI_GUIDELINES.md
+UI_LV_STYLE.md
