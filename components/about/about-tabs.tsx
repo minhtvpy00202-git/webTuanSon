@@ -3,8 +3,10 @@
 import { useState } from "react";
 
 type AboutTabsProps = {
+  companyName: string;
   aboutUs: string;
   mission: string;
+  vision: string;
 };
 
 const tabs = [
@@ -18,13 +20,13 @@ const tabs = [
   },
 ] as const;
 
-export function AboutTabs({ aboutUs, mission }: AboutTabsProps) {
+export function AboutTabs({ companyName, aboutUs, mission, vision }: AboutTabsProps) {
   const [activeTab, setActiveTab] =
     useState<(typeof tabs)[number]["id"]>("about");
 
   return (
-    <div className="space-y-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-      <div className="flex flex-wrap gap-3">
+    <div className="mhv-card space-y-6 p-6 sm:p-8">
+      <div className="grid gap-3 sm:grid-cols-2">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
 
@@ -33,10 +35,10 @@ export function AboutTabs({ aboutUs, mission }: AboutTabsProps) {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ease-in-out ${
+              className={`w-full rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ease-in-out ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "border border-slate-200 bg-white text-slate-600 hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-600 hover:shadow-sm"
+                  ? "mhv-btn-primary shadow-sm"
+                  : "mhv-btn-secondary hover:-translate-y-0.5 hover:shadow-sm"
               }`}
             >
               {tab.label}
@@ -44,21 +46,38 @@ export function AboutTabs({ aboutUs, mission }: AboutTabsProps) {
           );
         })}
       </div>
-
-      <div className="rounded-xl bg-slate-50 p-5 sm:p-6">
+      <div className="mhv-muted-surface p-5 sm:p-6">
         {activeTab === "about" ? (
           <div className="space-y-3">
-            <p className="text-sm font-medium text-blue-600">Giới thiệu doanh nghiệp</p>
-            <p className="whitespace-pre-line text-sm leading-7 text-slate-700 sm:text-base">
+            <p className="text-sm font-medium text-[var(--primary)]">
+              Giới thiệu doanh nghiệp
+            </p>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              {companyName}
+            </h2>
+            <p className="whitespace-pre-line text-sm leading-7 text-slate-700 dark:text-slate-300 sm:text-base">
               {aboutUs}
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-blue-600">Nhiệm vụ & Sứ mệnh</p>
-            <p className="whitespace-pre-line text-sm leading-7 text-slate-700 sm:text-base">
-              {mission}
-            </p>
+          <div className="space-y-5">
+            <p className="text-sm font-medium text-[var(--primary)]">Nhiệm vụ & Sứ mệnh</p>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Nhiệm vụ
+              </h3>
+              <p className="whitespace-pre-line text-sm leading-7 text-slate-700 dark:text-slate-300 sm:text-base">
+                {mission}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Sứ mệnh
+              </h3>
+              <p className="whitespace-pre-line text-sm leading-7 text-slate-700 dark:text-slate-300 sm:text-base">
+                {vision}
+              </p>
+            </div>
           </div>
         )}
       </div>

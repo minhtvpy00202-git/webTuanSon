@@ -17,9 +17,9 @@ function ContactInfoCard({
   href?: string;
 }) {
   const content = (
-    <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md">
-      <p className="text-sm font-medium text-blue-600">{title}</p>
-      <p className="mt-2 text-base leading-7 text-slate-900">{value}</p>
+    <div className="mhv-card p-5 transition-all duration-200 ease-in-out hover:-translate-y-0.5">
+      <p className="text-sm font-semibold text-[var(--primary)]">{title}</p>
+      <p className="mt-2 text-base leading-7 text-slate-900 dark:text-slate-100">{value}</p>
     </div>
   );
 
@@ -40,17 +40,22 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
   const companyInfo = await prisma.companyInfo.findUnique({
     where: { id: 1 },
+    include: {
+      branches: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      },
+    },
   });
 
   return (
     <section className="space-y-6">
-      <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
+      <div className="mhv-card p-6 sm:p-8">
         <div className="space-y-3">
-          <p className="text-sm font-medium text-blue-600">Liên hệ & tư vấn</p>
-          <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl">
+          <p className="text-sm font-semibold text-[var(--primary)]">Liên hệ & tư vấn</p>
+          <h1 className="text-3xl font-semibold text-slate-900 sm:text-4xl dark:text-slate-100">
             Kết nối nhanh với đội ngũ tư vấn
           </h1>
-          <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-400">
             Chúng tôi sẵn sàng hỗ trợ báo giá, gợi ý sản phẩm phù hợp và tư vấn giải
             pháp vật liệu cho từng công trình.
           </p>
@@ -59,12 +64,12 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
 
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-4">
-          <div className="space-y-2 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <p className="text-sm font-medium text-blue-600">Thông tin doanh nghiệp</p>
-            <h2 className="text-2xl font-semibold text-slate-900">
+          <div className="mhv-card space-y-2 p-6">
+            <p className="text-sm font-semibold text-[var(--primary)]">Thông tin doanh nghiệp</p>
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
               Thông tin liên hệ chính thức
             </h2>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
               Bạn có thể gọi điện, gửi email hoặc liên hệ qua Zalo để được hỗ trợ trực
               tiếp.
             </p>
@@ -90,6 +95,49 @@ export default async function ContactPage({ searchParams }: ContactPageProps) {
               value={companyInfo?.zaloLink ?? "Đang cập nhật"}
               href={companyInfo?.zaloLink ?? undefined}
             />
+          </div>
+
+          <div className="mhv-card space-y-3 p-6">
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-[var(--primary)]">Chi nhánh & showroom</p>
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                Hệ thống địa chỉ đang hoạt động
+              </h3>
+            </div>
+
+            <div className="space-y-3">
+              {companyInfo?.branches.length ? (
+                companyInfo.branches.map((branch) => (
+                  <div key={branch.id} className="mhv-muted-surface p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-slate-900 dark:text-slate-100">{branch.name}</p>
+                      <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-[var(--primary)] dark:bg-orange-500/10">
+                        {branch.isShowroom ? "Showroom" : "Chi nhánh"}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">{branch.address}</p>
+                    <div className="mt-3 flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-400">
+                      {branch.phone ? <span>Điện thoại: {branch.phone}</span> : null}
+                      {branch.email ? <span>Email: {branch.email}</span> : null}
+                      {branch.mapsLink ? (
+                        <a
+                          href={branch.mapsLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-medium text-[var(--primary)] hover:text-[var(--primary-hover)]"
+                        >
+                          Xem bản đồ
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
+                  Doanh nghiệp chưa cập nhật chi nhánh hoặc showroom.
+                </p>
+              )}
+            </div>
           </div>
         </div>
 

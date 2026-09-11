@@ -7,3 +7,7 @@ export function formatCurrency(value: number | string) {
     maximumFractionDigits: 0,
   }).format(numericValue);
 }
+
+export function formatCurrencyPerUnit(value: number | string, unitLabel: string) {
+  return `${formatCurrency(value)}/${unitLabel}`;
+}

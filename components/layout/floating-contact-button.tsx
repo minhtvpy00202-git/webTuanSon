@@ -123,7 +123,7 @@ export function FloatingContactButton({
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {isOpen ? (
         <div className="flex flex-col items-end gap-3">
-          <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="mhv-card p-3">
             <div className="flex flex-col gap-2">
               {items.map((item) => (
                 <a
@@ -131,9 +131,9 @@ export function FloatingContactButton({
                   href={item.href}
                   target={item.key === "zalo" ? "_blank" : undefined}
                   rel={item.key === "zalo" ? "noreferrer" : undefined}
-                  className="flex min-w-40 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-all duration-200 ease-in-out hover:-translate-y-1 hover:border-blue-200 hover:text-blue-600 hover:shadow-md"
+                  className="mhv-btn-secondary flex min-w-40 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-md"
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--primary)_12%,var(--card))] text-[var(--primary)]">
                     {iconMap[item.key]}
                   </span>
                   <span>{item.label}</span>
@@ -145,7 +145,7 @@ export function FloatingContactButton({
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-1 hover:bg-slate-800 hover:shadow-md"
+            className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-1 hover:bg-slate-800 hover:shadow-md dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
             aria-label="Đóng menu liên hệ"
           >
             <CloseIcon />
@@ -155,7 +155,7 @@ export function FloatingContactButton({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-3 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-1 hover:bg-blue-700 hover:shadow-md"
+          className="mhv-btn-primary flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-md"
           aria-label="Mở menu liên hệ"
         >
           <SupportIcon />

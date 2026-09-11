@@ -92,24 +92,26 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
   }
 
   return (
-    <div className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
+    <div className="mhv-card space-y-4 p-6 sm:p-8">
       <div className="space-y-2">
-        <p className="text-sm font-medium text-blue-600">Biểu mẫu liên hệ</p>
-        <h2 className="text-2xl font-semibold text-slate-900">Gửi thông tin cho chúng tôi</h2>
-        <p className="text-sm leading-6 text-slate-600">
+        <p className="text-sm font-medium text-[var(--primary)]">Biểu mẫu liên hệ</p>
+        <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          Gửi thông tin cho chúng tôi
+        </h2>
+        <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
           Điền nhanh nhu cầu của bạn, đội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm
           nhất.
         </p>
       </div>
 
       {isSubmitted && submitMessage ? (
-        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-700">
+        <div className="mhv-alert-success rounded-xl p-4 text-sm leading-6">
           {submitMessage} Chúng tôi sẽ liên hệ lại sớm nhất có thể.
         </div>
       ) : null}
 
       {submitError ? (
-        <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-6 text-red-700">
+        <div className="mhv-alert-danger rounded-xl p-4 text-sm leading-6">
           {submitError}
         </div>
       ) : null}
@@ -117,12 +119,14 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900">Họ và tên</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              Họ và tên
+            </span>
             <input
               type="text"
               value={formData.fullName}
               onChange={(event) => updateField("fullName", event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+              className="mhv-input text-sm"
               placeholder="Nhập họ và tên"
               required
             />
@@ -132,12 +136,14 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900">Số điện thoại</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              Số điện thoại
+            </span>
             <input
               type="tel"
               value={formData.phone}
               onChange={(event) => updateField("phone", event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+              className="mhv-input text-sm"
               placeholder="Nhập số điện thoại"
               required
             />
@@ -147,12 +153,14 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900">Email</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              Email
+            </span>
             <input
               type="email"
               value={formData.email}
               onChange={(event) => updateField("email", event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+              className="mhv-input text-sm"
               placeholder="Nhập địa chỉ email"
               required
             />
@@ -160,12 +168,14 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-medium text-slate-900">Sản phẩm quan tâm</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+              Sản phẩm quan tâm
+            </span>
             <input
               type="text"
               value={formData.productInterest}
               onChange={(event) => updateField("productInterest", event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+              className="mhv-input text-sm"
               placeholder="Ví dụ: Gạch ốp lát 600x600"
             />
             {errors.productInterest ? (
@@ -175,11 +185,13 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
         </div>
 
         <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-900">Nội dung cần tư vấn</span>
+          <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            Nội dung cần tư vấn
+          </span>
           <textarea
             value={formData.message}
             onChange={(event) => updateField("message", event.target.value)}
-            className="min-h-32 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-200 ease-in-out placeholder:text-slate-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="mhv-input min-h-32 text-sm"
             placeholder="Mô tả nhu cầu của bạn để chúng tôi tư vấn chính xác hơn"
             required
           />
@@ -189,7 +201,7 @@ export function ContactForm({ initialProductInterest = "" }: ContactFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md"
+          className="mhv-btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-md"
         >
           {isSubmitting ? "Đang gửi yêu cầu..." : "Gửi yêu cầu tư vấn"}
         </button>

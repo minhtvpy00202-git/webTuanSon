@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "coresg-normal.trae.ai",
       },
+      {
+        protocol: "https",
+        hostname: "mkrmnlflnxmcpnldbaiq.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
 };
