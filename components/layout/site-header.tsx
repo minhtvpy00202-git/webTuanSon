@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import LogoTS from "@/components/logo/LogoTS";
 
 const navItems = [
@@ -13,12 +13,15 @@ const navItems = [
   { href: "/contact", label: "Liên hệ" },
 ];
 
+type CategoryNavItem = { id: number; name: string; slug: string };
+
 type SiteHeaderProps = {
   companyName?: string | null;
   session?: {
     role: string;
     username: string;
   } | null;
+  categories?: CategoryNavItem[];
 };
 
 function HamburgerIcon() {
@@ -75,11 +78,13 @@ function UserIcon() {
   );
 }
 
-export function SiteHeader({ companyName, session }: SiteHeaderProps) {
+export function SiteHeader({ companyName, session, categories = [] }: SiteHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const isAdmin = session?.role === "admin";
   const hasSession = Boolean(session);
 
@@ -88,6 +93,7 @@ export function SiteHeader({ companyName, session }: SiteHeaderProps) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
+      setIsCategoriesOpen(false);
     }
     return () => {
       document.body.style.overflow = "";
@@ -110,6 +116,17 @@ export function SiteHeader({ companyName, session }: SiteHeaderProps) {
     }
     return pathname === href || pathname.startsWith(`${href}/`);
   }
+
+  const selectedCategorySlugs = useMemo(() => {
+    const raw = searchParams.get("categories") ?? searchParams.get("category");
+    if (!raw) return new Set<string>();
+    return new Set(
+      raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+    );
+  }, [searchParams]);
 
   const displayName = (companyName || "Digital Catalogue")
     .toUpperCase()
@@ -241,6 +258,84 @@ export function SiteHeader({ companyName, session }: SiteHeaderProps) {
             <nav className="flex flex-col px-4 py-4 sm:px-6">
               {navItems.map((item) => {
                 const isActive = isNavItemActive(item.href);
+                if (item.href === "/products") {
+                  return (
+                    <div key={item.href} className="border-b border-[var(--border)]">
+                      <button
+                        type="button"
+                        onClick={() => setIsCategoriesOpen((v) => !v)}
+                        aria-expanded={isCategoriesOpen}
+                        aria-controls="menu-categories-expand"
+                        className={`flex w-full items-center justify-between py-4 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                          isActive
+                            ? "text-[var(--foreground)]"
+                            : "text-[var(--foreground)]"
+                        }`}
+                      >
+                        <span>Thể loại</span>
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden="true"
+                          className={`h-4 w-4 transition-transform duration-300 ease-in-out ${
+                            isCategoriesOpen ? "rotate-180" : ""
+                          }`}
+                        >
+                          <path
+                            d="m6 9 6 6 6-6"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                      <div
+                        id="menu-categories-expand"
+                        className={`grid overflow-hidden border-t border-[var(--border)] transition-[grid-template-rows,opacity] duration-[700ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                          isCategoriesOpen
+                            ? "grid-rows-[1fr] opacity-100"
+                            : "grid-rows-[0fr] opacity-0"
+                        }`}
+                      >
+                        <div className="min-h-0">
+                          <div className="flex flex-col">
+                            <Link
+                              href="/products"
+                              onClick={() => setIsMenuOpen(false)}
+                              className={`px-4 py-3.5 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:bg-[var(--surface-muted)] hover:opacity-70 ${
+                                pathname === "/products" && selectedCategorySlugs.size === 0
+                                  ? "bg-[var(--surface-muted)] text-[var(--foreground)]"
+                                  : "text-[var(--foreground)]"
+                              }`}
+                            >
+                              Tất cả sản phẩm
+                            </Link>
+                            {categories.map((cat) => {
+                              const isCatActive = selectedCategorySlugs.has(cat.slug);
+                              return (
+                                <Link
+                                  key={cat.id}
+                                  href={`/products?categories=${encodeURIComponent(
+                                    cat.slug,
+                                  )}`}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className={`px-4 py-3.5 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:bg-[var(--surface-muted)] hover:opacity-70 ${
+                                    isCatActive
+                                      ? "bg-[var(--surface-muted)] text-[var(--foreground)]"
+                                      : "text-[var(--foreground)]"
+                                  }`}
+                                >
+                                  {cat.name}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <Link
                     key={item.href}

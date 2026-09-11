@@ -63,6 +63,15 @@ export async function POST(request: Request) {
 
   await setAdminSessionCookie(token);
 
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date(), updatedAt: new Date() },
+    });
+  } catch (err) {
+    console.warn("Không thể cập nhật lastLoginAt:", err);
+  }
+
   return NextResponse.json({
     success: true,
     message: "Đăng nhập thành công.",

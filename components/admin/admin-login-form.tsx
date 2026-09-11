@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { PasswordInput } from "@/components/ui/password-input";
+
 export function AdminLoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
@@ -79,19 +81,14 @@ export function AdminLoginForm() {
         />
       </label>
 
-      <label className="space-y-2">
-        <span className="text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
-          Mật khẩu
-        </span>
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="mhv-input text-sm tracking-[0.4px]"
-          placeholder="Nhập mật khẩu admin"
-          required
-        />
-      </label>
+      <PasswordInput
+        label="Mật khẩu"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        placeholder="Nhập mật khẩu admin"
+        required
+        autoComplete="current-password"
+      />
 
       <button
         type="submit"

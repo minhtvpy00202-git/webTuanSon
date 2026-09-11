@@ -8,6 +8,7 @@ import { getAdminSession } from "@/lib/admin-auth";
 const navItems = [
   { href: "/admin/products", label: "Quản lý sản phẩm" },
   { href: "/admin/categories", label: "Quản lý loại sản phẩm" },
+  { href: "/admin/accounts", label: "Quản lý tài khoản" },
   { href: "/admin/company", label: "Thông tin doanh nghiệp" },
   { href: "/admin/contact-info", label: "Liên hệ & chi nhánh" },
 ];

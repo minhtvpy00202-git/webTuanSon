@@ -17,14 +17,18 @@ model Role {
 }
 
 model User {
-  id           Int    @id @default(autoincrement())
-  username     String @unique
-  email        String @unique
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  email        String   @unique
   passwordHash String
   roleId       Int
-  role         Role   @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  role         Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  lastLoginAt  DateTime?
 
   @@index([roleId])
+  @@index([createdAt])
   @@map("users")
 }
 
