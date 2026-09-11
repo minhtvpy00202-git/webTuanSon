@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -14,6 +15,14 @@ const navItems = [
 ];
 
 type CategoryNavItem = { id: number; name: string; slug: string };
+type FeaturedCategoryProduct = {
+  categoryId: number;
+  categoryName: string;
+  categorySlug: string;
+  productId: number;
+  productName: string;
+  productImageUrl: string | null;
+};
 
 type SiteHeaderProps = {
   companyName?: string | null;
@@ -22,7 +31,10 @@ type SiteHeaderProps = {
     username: string;
   } | null;
   categories?: CategoryNavItem[];
+  featuredCategoryProducts?: FeaturedCategoryProduct[];
 };
+
+type MenuView = "main" | "categories";
 
 function HamburgerIcon() {
   return (
@@ -78,13 +90,37 @@ function UserIcon() {
   );
 }
 
-export function SiteHeader({ companyName, session, categories = [] }: SiteHeaderProps) {
+function ChevronLeftIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`h-4 w-4 ${className}`}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="m15 18-6-6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function SiteHeader({
+  companyName,
+  session,
+  categories = [],
+  featuredCategoryProducts = [],
+}: SiteHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [view, setView] = useState<MenuView>("main");
   const isAdmin = session?.role === "admin";
   const hasSession = Boolean(session);
 
@@ -93,7 +129,7 @@ export function SiteHeader({ companyName, session, categories = [] }: SiteHeader
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
-      setIsCategoriesOpen(false);
+      setView("main");
     }
     return () => {
       document.body.style.overflow = "";
@@ -134,6 +170,18 @@ export function SiteHeader({ companyName, session, categories = [] }: SiteHeader
     .filter(Boolean)
     .slice(0, 3)
     .join(" ");
+
+  function openCategories() {
+    setView("categories");
+  }
+
+  function backToMain() {
+    setView("main");
+  }
+
+  function closeMenu() {
+    setIsMenuOpen(false);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]">
@@ -234,158 +282,273 @@ export function SiteHeader({ companyName, session, categories = [] }: SiteHeader
         <>
           <div
             className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:bg-black/40"
-            onClick={() => setIsMenuOpen(false)}
+            onClick={closeMenu}
             aria-hidden="true"
           />
-          <div className="fixed z-[51] bg-[var(--background)] border-[var(--border)] left-0 right-0 top-0 max-h-[85vh] w-full overflow-y-auto border-b lv-menu-slide-enter lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:max-h-none lg:w-[380px] lg:max-w-[85vw] lg:border-b-0 lg:border-r">
-            <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-4 sm:px-6">
-              <button
-                type="button"
-                onClick={() => setIsMenuOpen(false)}
-                className="inline-flex h-11 items-center gap-2 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
-                aria-label="Đóng menu"
+          <div
+            className={`fixed z-[51] bg-[var(--background)] border-[var(--border)] left-0 right-0 top-0 h-[85vh] w-full max-h-[100vh] overflow-hidden border-b lv-menu-slide-enter lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:max-h-none lg:border-b-0 lg:border-r transition-[width,max-width] duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+              view === "categories"
+                ? "lg:w-[min(92vw,1100px)] lg:max-w-[min(92vw,1100px)]"
+                : "lg:w-[380px] lg:max-w-[380px]"
+            }`}
+          >
+            <div className="relative flex h-full w-full flex-col">
+              <div
+                className={`absolute inset-x-0 top-0 z-20 flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)] px-4 py-4 transition-all duration-700 ease-[cubic-bezier(.22,.61,.36,1)] sm:px-6 ${
+                  view === "main"
+                    ? "opacity-100 translate-y-0"
+                    : "pointer-events-none opacity-0 -translate-y-3"
+                }`}
+                aria-hidden={view !== "main"}
               >
-                <CloseIcon />
-                <span className="ml-2">Đóng</span>
-              </button>
-              <Link href="/" onClick={() => setIsMenuOpen(false)} className="transition-all duration-300 ease-in-out hover:opacity-70">
-                <LogoTS className="h-8 w-auto text-[var(--foreground)] sm:h-10" />
-                <span className="sr-only">{displayName}</span>
-              </Link>
-              <div className="w-16" />
-            </div>
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="inline-flex h-11 items-center gap-2 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+                  aria-label="Đóng menu"
+                >
+                  <CloseIcon />
+                  <span className="ml-2">Đóng</span>
+                </button>
+                <Link href="/" onClick={closeMenu} className="transition-all duration-300 ease-in-out hover:opacity-70">
+                  <LogoTS className="h-8 w-auto text-[var(--foreground)] sm:h-10" />
+                  <span className="sr-only">{displayName}</span>
+                </Link>
+                <div className="w-16" />
+              </div>
 
-            <nav className="flex flex-col px-4 py-4 sm:px-6">
-              {navItems.map((item) => {
-                const isActive = isNavItemActive(item.href);
-                if (item.href === "/products") {
-                  return (
-                    <div key={item.href} className="border-b border-[var(--border)]">
-                      <button
-                        type="button"
-                        onClick={() => setIsCategoriesOpen((v) => !v)}
-                        aria-expanded={isCategoriesOpen}
-                        aria-controls="menu-categories-expand"
-                        className={`flex w-full items-center justify-between py-4 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
-                          isActive
-                            ? "text-[var(--foreground)]"
-                            : "text-[var(--foreground)]"
-                        }`}
-                      >
-                        <span>Thể loại</span>
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          aria-hidden="true"
-                          className={`h-4 w-4 transition-transform duration-300 ease-in-out ${
-                            isCategoriesOpen ? "rotate-180" : ""
+              <div
+                className={`absolute inset-x-0 top-0 z-20 flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)] px-4 py-4 transition-all duration-700 ease-[cubic-bezier(.22,.61,.36,1)] sm:px-6 ${
+                  view === "categories"
+                    ? "opacity-100 translate-y-0"
+                    : "pointer-events-none opacity-0 translate-y-3"
+                }`}
+                aria-hidden={view !== "categories"}
+              >
+                <button
+                  type="button"
+                  onClick={backToMain}
+                  className="inline-flex h-11 items-center gap-3 text-lg font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                  <span className="lv-underline-item">Thể loại</span>
+                </button>
+                <Link href="/" onClick={closeMenu} className="transition-all duration-300 ease-in-out hover:opacity-70">
+                  <LogoTS className="h-8 w-auto text-[var(--foreground)] sm:h-10" />
+                  <span className="sr-only">{displayName}</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={closeMenu}
+                  className="inline-flex h-11 w-11 items-center justify-center text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+                  aria-label="Đóng menu"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+
+              <div className="relative flex-1 overflow-hidden pt-[73px]">
+                <div
+                  className={`absolute inset-0 overflow-y-auto pt-[1px] transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                    view === "main"
+                      ? "translate-x-0 opacity-100"
+                      : "-translate-x-full opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <nav className="flex flex-col px-4 py-4 sm:px-6">
+                    {navItems.map((item) => {
+                      const isActive = isNavItemActive(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMenu}
+                          className={`border-b border-[var(--border)] py-4 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                            isActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
                           }`}
                         >
-                          <path
-                            d="m6 9 6 6 6-6"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                      <div
-                        id="menu-categories-expand"
-                        className={`grid overflow-hidden border-t border-[var(--border)] transition-[grid-template-rows,opacity] duration-[700ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
-                          isCategoriesOpen
-                            ? "grid-rows-[1fr] opacity-100"
-                            : "grid-rows-[0fr] opacity-0"
-                        }`}
-                      >
-                        <div className="min-h-0">
-                          <div className="flex flex-col">
-                            <Link
-                              href="/products"
-                              onClick={() => setIsMenuOpen(false)}
-                              className={`px-4 py-3.5 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:bg-[var(--surface-muted)] hover:opacity-70 ${
-                                pathname === "/products" && selectedCategorySlugs.size === 0
-                                  ? "bg-[var(--surface-muted)] text-[var(--foreground)]"
-                                  : "text-[var(--foreground)]"
-                              }`}
-                            >
-                              Tất cả sản phẩm
-                            </Link>
-                            {categories.map((cat) => {
-                              const isCatActive = selectedCategorySlugs.has(cat.slug);
-                              return (
-                                <Link
-                                  key={cat.id}
-                                  href={`/products?categories=${encodeURIComponent(
-                                    cat.slug,
-                                  )}`}
-                                  onClick={() => setIsMenuOpen(false)}
-                                  className={`px-4 py-3.5 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:bg-[var(--surface-muted)] hover:opacity-70 ${
-                                    isCatActive
-                                      ? "bg-[var(--surface-muted)] text-[var(--foreground)]"
-                                      : "text-[var(--foreground)]"
-                                  }`}
-                                >
-                                  {cat.name}
-                                </Link>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`border-b border-[var(--border)] py-4 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
-                      isActive
-                        ? "text-[var(--foreground)]"
-                        : "text-[var(--foreground)]"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+                          <span className="lv-underline-item">{item.label}</span>
+                        </Link>
+                      );
+                    })}
 
-            <div className="border-t border-[var(--border)] px-4 py-4 sm:px-6">
-              <div className="flex flex-col gap-3">
-                <p className="text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
-                  Hỗ trợ khách hàng
-                </p>
-                {!hasSession ? (
-                  <Link
-                    href="/admin/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="lv-solid-primary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
-                  >
-                    Đăng nhập
-                  </Link>
-                ) : (
-                  <>
-                    {isAdmin ? (
-                      <Link
-                        href="/admin/products"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="lv-solid-primary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
-                      >
-                        Trang quản trị
-                      </Link>
-                    ) : null}
                     <button
                       type="button"
-                      onClick={handleLogout}
-                      className="mhv-btn-secondary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
+                      onClick={openCategories}
+                      className={`flex w-full items-center justify-between border-b border-[var(--border)] py-4 text-base font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70`}
                     >
-                      Đăng xuất
+                      <span className="lv-underline-item">Thể loại</span>
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4 shrink-0 opacity-60"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="m9 18 6-6-6-6"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </button>
-                  </>
-                )}
+                  </nav>
+
+                  <div className="border-t border-[var(--border)] px-4 py-4 sm:px-6">
+                    <div className="flex flex-col gap-3">
+                      <p className="text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
+                        Hỗ trợ khách hàng
+                      </p>
+                      {!hasSession ? (
+                        <Link
+                          href="/admin/login"
+                          onClick={closeMenu}
+                          className="lv-solid-primary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
+                        >
+                          Đăng nhập
+                        </Link>
+                      ) : (
+                        <>
+                          {isAdmin ? (
+                            <Link
+                              href="/admin/products"
+                              onClick={closeMenu}
+                              className="lv-solid-primary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
+                            >
+                              Trang quản trị
+                            </Link>
+                          ) : null}
+                          <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="mhv-btn-secondary px-4 py-3 text-center text-sm font-normal tracking-[0.4px]"
+                          >
+                            Đăng xuất
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  className={`absolute inset-0 overflow-y-auto transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                    view === "categories"
+                      ? "translate-x-0 opacity-100"
+                      : "translate-x-full opacity-0 pointer-events-none"
+                  }`}
+                >
+                  <div className="grid h-full grid-cols-1 gap-0 lg:grid-cols-2">
+                    <div className="min-h-0 border-b border-[var(--border)] px-4 py-4 sm:px-6 lg:border-b-0 lg:border-r lg:py-6">
+                      <div className="flex flex-col">
+                        {categories.length === 0 ? (
+                          <div className="px-2 py-8 text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
+                            Chưa có thể loại nào.
+                          </div>
+                        ) : null}
+                        {categories.map((cat) => {
+                          const isCatActive = selectedCategorySlugs.has(cat.slug);
+                          return (
+                            <Link
+                              key={cat.id}
+                              href={`/products?categories=${encodeURIComponent(cat.slug)}`}
+                              onClick={closeMenu}
+                              className={`px-2 py-3.5 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
+                              }`}
+                            >
+                              <span className="lv-underline-item">{cat.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="min-h-0 px-4 py-4 sm:px-6 lg:px-6 lg:py-6">
+                      <div className="grid grid-cols-3 gap-3 lg:grid-cols-1 lg:gap-4">
+                        {featuredCategoryProducts.length > 0
+                          ? featuredCategoryProducts.map((fp, idx) => (
+                              <Link
+                                key={`${fp.categoryId}-${fp.productId}`}
+                                href={`/products/${fp.productId}`}
+                                onClick={closeMenu}
+                                className="group flex flex-col gap-2 transition-all duration-900 ease-[cubic-bezier(.22,.61,.36,1)]"
+                                style={{
+                                  transitionDelay: view === "categories" ? `${250 + idx * 180}ms` : "0ms",
+                                  transform: view === "categories" ? "translateY(0)" : "translateY(28px)",
+                                  opacity: view === "categories" ? 1 : 0,
+                                }}
+                              >
+                                <div className="relative aspect-square w-full overflow-hidden border border-[var(--border)] bg-[var(--surface-muted)]">
+                                  {fp.productImageUrl ? (
+                                    <Image
+                                      src={fp.productImageUrl}
+                                      alt={fp.productName}
+                                      fill
+                                      sizes="(max-width: 1024px) 30vw, 320px"
+                                      className="object-cover transition-all duration-800 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-105"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-[var(--muted)]">
+                                      <svg
+                                        viewBox="0 0 24 24"
+                                        className="h-8 w-8 opacity-50"
+                                        fill="none"
+                                        aria-hidden="true"
+                                      >
+                                        <rect
+                                          x="3"
+                                          y="4"
+                                          width="18"
+                                          height="16"
+                                          stroke="currentColor"
+                                          strokeWidth="1.2"
+                                        />
+                                        <circle
+                                          cx="9"
+                                          cy="10"
+                                          r="1.5"
+                                          stroke="currentColor"
+                                          strokeWidth="1.2"
+                                        />
+                                        <path
+                                          d="m4 18 5-5 3 3 4-4 4 4"
+                                          stroke="currentColor"
+                                          strokeWidth="1.2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        />
+                                      </svg>
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="line-clamp-1 text-xs font-normal tracking-[0.4px] text-[var(--foreground)]">
+                                  {fp.productName}
+                                </p>
+                              </Link>
+                            ))
+                          : Array.from({ length: 3 }).map((_, idx) => (
+                              <div
+                                key={`placeholder-${idx}`}
+                                className="flex flex-col gap-2"
+                                style={{
+                                  transitionDelay: view === "categories" ? `${250 + idx * 180}ms` : "0ms",
+                                  transitionProperty: "transform, opacity",
+                                  transitionDuration: "900ms",
+                                  transitionTimingFunction:
+                                    "cubic-bezier(0.22, 0.61, 0.36, 1)",
+                                  transform: view === "categories" ? "translateY(0)" : "translateY(28px)",
+                                  opacity: view === "categories" ? 1 : 0,
+                                }}
+                              >
+                                <div className="relative aspect-square w-full border border-[var(--border)] bg-[var(--surface-muted)]" />
+                                <p className="h-4 w-3/4 bg-[var(--surface-muted)]" />
+                              </div>
+                            ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
