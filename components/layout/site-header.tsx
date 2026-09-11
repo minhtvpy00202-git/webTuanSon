@@ -338,7 +338,7 @@ export function SiteHeader({
                   <CloseIcon />
                   <span className="ml-2">Đóng</span>
                 </button>
-                <Link href="/" onClick={closeMenu} className="flex items-center gap-2 sm:gap-3 transition-all duration-300 ease-in-out hover:opacity-70">
+                <Link href="/" onClick={closeMenu} className="transition-all duration-300 ease-in-out hover:opacity-70">
                   <Image
                     src="/icon.svg"
                     alt="Logo Vật liệu xây dựng Tuấn Sơn"
@@ -346,21 +346,7 @@ export function SiteHeader({
                     height={40}
                     className="h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                   />
-                  <span
-                    className="hidden select-none text-[var(--foreground)] sm:block"
-                    style={{
-                      fontWeight: 700,
-                      letterSpacing: "2px",
-                      fontFamily:
-                        "Inter, 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif",
-                      textTransform: "uppercase",
-                      lineHeight: 1,
-                    }}
-                  >
-                    <span className="block whitespace-nowrap text-[10px] leading-none tracking-[2.8px] sm:text-[11px] sm:tracking-[3px]">
-                      Vật liệu xây dựng Tuấn Sơn
-                    </span>
-                  </span>
+                  <span className="sr-only">{displayName}</span>
                 </Link>
                 <div className="w-16" />
               </div>
@@ -381,7 +367,7 @@ export function SiteHeader({
                   <ChevronLeftIcon className="h-5 w-5" />
                   <span className="lv-underline-item">Thể loại</span>
                 </button>
-                <Link href="/" onClick={closeMenu} className="flex items-center gap-2 sm:gap-3 transition-all duration-300 ease-in-out hover:opacity-70">
+                <Link href="/" onClick={closeMenu} className="transition-all duration-300 ease-in-out hover:opacity-70">
                   <Image
                     src="/icon.svg"
                     alt="Logo Vật liệu xây dựng Tuấn Sơn"
@@ -389,21 +375,7 @@ export function SiteHeader({
                     height={40}
                     className="h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                   />
-                  <span
-                    className="hidden select-none text-[var(--foreground)] sm:block"
-                    style={{
-                      fontWeight: 700,
-                      letterSpacing: "2px",
-                      fontFamily:
-                        "Inter, 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif",
-                      textTransform: "uppercase",
-                      lineHeight: 1,
-                    }}
-                  >
-                    <span className="block whitespace-nowrap text-[10px] leading-none tracking-[2.8px] sm:text-[11px] sm:tracking-[3px]">
-                      Vật liệu xây dựng Tuấn Sơn
-                    </span>
-                  </span>
+                  <span className="sr-only">{displayName}</span>
                 </Link>
                 <button
                   type="button"
