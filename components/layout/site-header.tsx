@@ -121,8 +121,23 @@ export function SiteHeader({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [view, setView] = useState<MenuView>("main");
+  const [categoriesPhase, setCategoriesPhase] = useState<0 | 1 | 2 | 3>(0);
   const isAdmin = session?.role === "admin";
   const hasSession = Boolean(session);
+
+  useEffect(() => {
+    if (view !== "categories") {
+      setCategoriesPhase(0);
+      return;
+    }
+    setCategoriesPhase(1);
+    const t2 = window.setTimeout(() => setCategoriesPhase(2), 900);
+    const t3 = window.setTimeout(() => setCategoriesPhase(3), 1800);
+    return () => {
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+    };
+  }, [view]);
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -287,8 +302,8 @@ export function SiteHeader({
           />
           <div
             className={`fixed z-[51] bg-[var(--background)] border-[var(--border)] left-0 right-0 top-0 h-[85vh] w-full max-h-[100vh] overflow-hidden border-b lv-menu-slide-enter lg:left-0 lg:right-auto lg:top-0 lg:h-full lg:max-h-none lg:border-b-0 lg:border-r transition-[width,max-width] duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
-              view === "categories"
-                ? "lg:w-[min(92vw,1100px)] lg:max-w-[min(92vw,1100px)]"
+              view === "categories" && categoriesPhase >= 2
+                ? "lg:max-w-[calc(380px+1px+((100vh-260px)/3))] lg:w-[calc(380px+1px+((100vh-260px)/3))]"
                 : "lg:w-[380px] lg:max-w-[380px]"
             }`}
           >
@@ -349,7 +364,7 @@ export function SiteHeader({
 
               <div className="relative flex-1 overflow-hidden pt-[73px]">
                 <div
-                  className={`absolute inset-0 overflow-y-auto pt-[1px] transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                  className={`absolute inset-0 overflow-y-auto pt-[73px] transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
                     view === "main"
                       ? "translate-x-0 opacity-100"
                       : "-translate-x-full opacity-0 pointer-events-none"
@@ -433,14 +448,20 @@ export function SiteHeader({
                 </div>
 
                 <div
-                  className={`absolute inset-0 overflow-y-auto transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                  className={`absolute inset-0 overflow-y-auto pt-[73px] transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
                     view === "categories"
                       ? "translate-x-0 opacity-100"
                       : "translate-x-full opacity-0 pointer-events-none"
                   }`}
                 >
-                  <div className="grid h-full grid-cols-1 gap-0 lg:grid-cols-2">
-                    <div className="min-h-0 border-b border-[var(--border)] px-4 py-4 sm:px-6 lg:border-b-0 lg:border-r lg:py-6">
+                  <div
+                    className={`grid h-full min-h-full w-full gap-0 transition-[grid-template-columns] duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] grid-cols-1 lg:grid-cols-[380px_0fr] ${
+                      categoriesPhase >= 2
+                        ? "lg:grid-cols-[380px_minmax(0,1fr)]"
+                        : "lg:grid-cols-[380px_0fr]"
+                    }`}
+                  >
+                    <div className="min-h-0 w-full border-b border-[var(--border)] px-4 py-4 sm:px-6 lg:border-b-0 lg:border-r lg:py-5 lg:w-[380px] lg:min-w-[380px] lg:max-w-[380px]">
                       <div className="flex flex-col">
                         {categories.length === 0 ? (
                           <div className="px-2 py-8 text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
@@ -454,7 +475,7 @@ export function SiteHeader({
                               key={cat.id}
                               href={`/products?categories=${encodeURIComponent(cat.slug)}`}
                               onClick={closeMenu}
-                              className={`px-2 py-3.5 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                              className={`px-2 py-3 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
                                 isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
                               }`}
                             >
@@ -464,29 +485,57 @@ export function SiteHeader({
                         })}
                       </div>
                     </div>
-                    <div className="min-h-0 px-4 py-4 sm:px-6 lg:px-6 lg:py-6">
-                      <div className="grid grid-cols-3 gap-3 lg:grid-cols-1 lg:gap-4">
+                    <div
+                      className={`relative min-h-0 w-full overflow-hidden px-4 py-4 transition-[width,opacity,min-width] duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] sm:px-6 lg:px-6 lg:py-5 ${
+                        categoriesPhase >= 2
+                          ? "opacity-100 lg:min-w-0"
+                          : "pointer-events-none opacity-0 lg:w-0 lg:min-w-0 lg:px-0 lg:py-0"
+                      }`}
+                    >
+                      <div
+                        className="mx-auto grid h-full w-full grid-cols-3 gap-3 lg:grid-rows-3 lg:grid-cols-1 lg:gap-3 lg:max-w-[calc((100vh-260px)/3)]"
+                        style={{
+                          height: "100%",
+                          minHeight: 0,
+                        }}
+                      >
                         {featuredCategoryProducts.length > 0
                           ? featuredCategoryProducts.map((fp, idx) => (
                               <Link
                                 key={`${fp.categoryId}-${fp.productId}`}
                                 href={`/products/${fp.productId}`}
                                 onClick={closeMenu}
-                                className="group flex flex-col gap-2 transition-all duration-900 ease-[cubic-bezier(.22,.61,.36,1)]"
+                                className="group flex min-h-0 flex-col gap-1.5 transition-all duration-900 ease-[cubic-bezier(.22,.61,.36,1)]"
                                 style={{
-                                  transitionDelay: view === "categories" ? `${250 + idx * 180}ms` : "0ms",
-                                  transform: view === "categories" ? "translateY(0)" : "translateY(28px)",
-                                  opacity: view === "categories" ? 1 : 0,
+                                  transitionDelay:
+                                    categoriesPhase >= 3 ? `${200 + idx * 200}ms` : "0ms",
+                                  transform:
+                                    categoriesPhase >= 3
+                                      ? "translateY(0) scale(1)"
+                                      : "translateY(40px) scale(0.96)",
+                                  opacity: categoriesPhase >= 3 ? 1 : 0,
                                 }}
                               >
-                                <div className="relative aspect-square w-full overflow-hidden border border-[var(--border)] bg-[var(--surface-muted)]">
+                                <div
+                                  className="relative w-full overflow-hidden border border-[var(--border)] bg-[var(--surface-muted)]"
+                                  style={{
+                                    height: "auto",
+                                    maxHeight:
+                                      typeof window === "undefined"
+                                        ? "240px"
+                                        : "calc((100vh - 260px) / 3)",
+                                    flexShrink: 1,
+                                    minHeight: 0,
+                                    aspectRatio: "1 / 1",
+                                  }}
+                                >
                                   {fp.productImageUrl ? (
                                     <Image
                                       src={fp.productImageUrl}
                                       alt={fp.productName}
                                       fill
-                                      sizes="(max-width: 1024px) 30vw, 320px"
-                                      className="object-cover transition-all duration-800 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-105"
+                                      sizes="(max-width: 1024px) 30vw, calc((100vh - 260px) / 3)"
+                                      className="object-contain transition-all duration-900 ease-[cubic-bezier(.22,.61,.36,1)] group-hover:scale-[1.03]"
                                     />
                                   ) : (
                                     <div className="flex h-full w-full items-center justify-center text-[var(--muted)]">
@@ -530,18 +579,31 @@ export function SiteHeader({
                           : Array.from({ length: 3 }).map((_, idx) => (
                               <div
                                 key={`placeholder-${idx}`}
-                                className="flex flex-col gap-2"
+                                className="flex min-h-0 flex-col gap-1.5"
                                 style={{
-                                  transitionDelay: view === "categories" ? `${250 + idx * 180}ms` : "0ms",
+                                  transitionDelay:
+                                    categoriesPhase >= 3 ? `${200 + idx * 200}ms` : "0ms",
                                   transitionProperty: "transform, opacity",
                                   transitionDuration: "900ms",
                                   transitionTimingFunction:
                                     "cubic-bezier(0.22, 0.61, 0.36, 1)",
-                                  transform: view === "categories" ? "translateY(0)" : "translateY(28px)",
-                                  opacity: view === "categories" ? 1 : 0,
+                                  transform:
+                                    categoriesPhase >= 3
+                                      ? "translateY(0) scale(1)"
+                                      : "translateY(40px) scale(0.96)",
+                                  opacity: categoriesPhase >= 3 ? 1 : 0,
                                 }}
                               >
-                                <div className="relative aspect-square w-full border border-[var(--border)] bg-[var(--surface-muted)]" />
+                                <div
+                                  className="relative w-full border border-[var(--border)] bg-[var(--surface-muted)]"
+                                  style={{
+                                    maxHeight:
+                                      typeof window === "undefined"
+                                        ? "240px"
+                                        : "calc((100vh - 260px) / 3)",
+                                    aspectRatio: "1 / 1",
+                                  }}
+                                />
                                 <p className="h-4 w-3/4 bg-[var(--surface-muted)]" />
                               </div>
                             ))}
