@@ -5,7 +5,26 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ConfirmModal } from "@/components/admin/confirm-modal";
-import { uploadProductImages, deleteProductImageByPath } from "@/lib/supabase-storage";
+
+type HeroSlideUploadResult = { path: string; publicUrl: string };
+
+async function uploadImagesViaServer(files: File[]): Promise<HeroSlideUploadResult[]> {
+  const body = new FormData();
+  files.forEach((file) => body.append("files", file));
+  const res = await fetch("/api/admin/storage/upload-product", {
+    method: "POST",
+    body,
+  });
+  const data = (await res.json()) as {
+    success: boolean;
+    message: string;
+    images?: HeroSlideUploadResult[];
+  };
+  if (!res.ok || !data.success || !data.images) {
+    throw new Error(data.message || "Không thể upload ảnh slide.");
+  }
+  return data.images;
+}
 
 type HeroSlideFormState = {
   id?: number;
@@ -121,13 +140,23 @@ export function CompanyInfoForm({ initialValues }: CompanyInfoFormProps) {
       }
 
       let slideIndex = 0;
+      const slidesWithNewFiles = activeSlides.filter((s) => s.file);
+      const uploadedFileResults =
+        slidesWithNewFiles.length > 0
+          ? await uploadImagesViaServer(slidesWithNewFiles.map((s) => s.file as File))
+          : [];
+      let uploadedCursor = 0;
+
       for (const slide of activeSlides) {
         let imageUrl = slide.imageUrl;
         let storagePath = slide.storagePath;
         if (slide.file) {
-          const result = await uploadProductImages([slide.file]);
-          imageUrl = result[0].publicUrl;
-          storagePath = result[0].path;
+          const result = uploadedFileResults[uploadedCursor++] ?? {
+            path: "",
+            publicUrl: "",
+          };
+          imageUrl = result.publicUrl;
+          storagePath = result.path;
         }
         uploadedSlides.push({
           ...slide,
@@ -407,17 +436,16 @@ export function CompanyInfoForm({ initialValues }: CompanyInfoFormProps) {
       </div>
 
       <ConfirmModal
-        isOpen={pendingDeleteIndex !== null}
+        open={pendingDeleteIndex !== null}
         title="Xóa slide?"
-        message={
+        description={
           pendingDeleteIndex !== null
             ? `Slide "${visibleSlides[pendingDeleteIndex]?.heading || `thứ ${pendingDeleteIndex + 1}`}" sẽ bị xóa khỏi carousel. Tiếp tục?`
             : ""
         }
         confirmLabel="Xóa"
-        cancelLabel="Hủy"
+        onClose={() => setPendingDeleteIndex(null)}
         onConfirm={doDeleteSlide}
-        onCancel={() => setPendingDeleteIndex(null)}
       />
     </form>
   );

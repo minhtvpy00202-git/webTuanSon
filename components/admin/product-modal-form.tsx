@@ -5,7 +5,39 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { ConfirmModal } from "@/components/admin/confirm-modal";
-import { uploadProductImages, deleteProductImageByPath } from "@/lib/supabase-storage";
+
+type UploadedImagePayload = { path: string; publicUrl: string };
+
+async function uploadImagesViaServer(files: File[]): Promise<UploadedImagePayload[]> {
+  const body = new FormData();
+  files.forEach((file) => body.append("files", file));
+  const res = await fetch("/api/admin/storage/upload-product", {
+    method: "POST",
+    body,
+  });
+  const data = (await res.json()) as {
+    success: boolean;
+    message: string;
+    images?: UploadedImagePayload[];
+  };
+  if (!res.ok || !data.success || !data.images) {
+    throw new Error(data.message || "Không thể upload ảnh sản phẩm.");
+  }
+  return data.images;
+}
+
+async function deleteImagesViaServer(paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  const res = await fetch("/api/admin/storage/delete-product-image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ paths }),
+  });
+  const data = (await res.json()) as { success: boolean; message: string };
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Không thể xóa ảnh sản phẩm.");
+  }
+}
 
 type CategoryOption = {
   id: number;
@@ -328,15 +360,15 @@ export function ProductModalForm({
       );
 
       if (removedStorageImages.length) {
-        void Promise.all(
-          removedStorageImages.map((img) =>
-            deleteProductImageByPath(img.storagePath).catch(() => undefined),
-          ),
-        );
+        void deleteImagesViaServer(
+          removedStorageImages
+            .map((img) => img.storagePath)
+            .filter((p): p is string => !!p),
+        ).catch(() => undefined);
       }
 
       if (newFiles.length) {
-        const uploadedResults = await uploadProductImages(
+        const uploadedResults = await uploadImagesViaServer(
           newFiles.map((img) => img.file as File),
         );
         let resultIdx = 0;

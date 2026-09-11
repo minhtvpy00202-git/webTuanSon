@@ -2,12 +2,44 @@ import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_PROJECT_REF_FALLBACK = "mkrmnlflnxmcpnldbaiq";
 
+let dotenvLoaded = false;
+function ensureDotenvLoaded() {
+  if (dotenvLoaded) return;
+  if (
+    typeof window !== "undefined" ||
+    typeof (globalThis as unknown as { document?: unknown }).document !== "undefined"
+  ) {
+    dotenvLoaded = true;
+    return;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require("dotenv").config({ override: false });
+  } catch {
+    // no-op
+  }
+  dotenvLoaded = true;
+}
+
+function readVar(...keys: string[]): string | undefined {
+  ensureDotenvLoaded();
+  for (const key of keys) {
+    const value = process.env[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return undefined;
+}
+
 function getSupabaseUrl() {
-  const explicitUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_HOST ||
-    process.env.SUPABASE_HOST;
+  const explicitUrl = readVar(
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_HOST",
+    "SUPABASE_HOST",
+    "PUBLIC_SUPABASE_URL",
+  );
 
   if (explicitUrl) {
     return explicitUrl.startsWith("http") ? explicitUrl : `https://${explicitUrl}`;
@@ -38,15 +70,21 @@ function getSupabaseUrl() {
 }
 
 function getSupabaseServiceRoleKey() {
-  const serviceRoleKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SECRET_KEY ||
-    process.env.SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SERVICE_KEY;
+  const serviceRoleKey = readVar(
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_SECRET_KEY",
+    "SERVICE_ROLE_KEY",
+    "SUPABASE_SERVICE_KEY",
+    "SUPABASE_ADMIN_KEY",
+    "SUPABASE_SERVER_KEY",
+  );
 
   if (!serviceRoleKey) {
+    const envAvailable = Object.keys(process.env).filter((k) => /SUPABASE|SERVICE|SECRET/i.test(k));
+    const found = envAvailable.length > 0 ? ` Các biến đang có (tên gần giống): ${envAvailable.join(", ")}.` : "";
     throw new Error(
-      "Thiếu khóa server của Supabase để upload ảnh sản phẩm. Hãy thêm SUPABASE_SERVICE_ROLE_KEY (hoặc SUPABASE_SECRET_KEY) vào file .env.",
+      "Thiếu khóa server của Supabase để upload ảnh sản phẩm. Hãy thêm SUPABASE_SERVICE_ROLE_KEY (hoặc SUPABASE_SECRET_KEY) vào file .env rồi khởi động lại dev server nếu cần." +
+        found,
     );
   }
 

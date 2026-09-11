@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ProductCard } from "@/components/products/product-card";
 import { getCompanyInfoWithBranches } from "@/lib/company";
 import { prisma } from "@/lib/prisma";
+import { HomeHeroCarousel } from "@/components/home/home-hero-carousel";
 
 const quickLinks = [
   {
@@ -70,7 +71,12 @@ function mapProductForCard(product: RawProduct) {
 export default async function HomePage() {
   const { companyInfo } = await getCompanyInfoWithBranches();
 
-  const [newestProducts, promotionProducts] = await Promise.all([
+  const heroSlidesPromise = prisma.heroSlide.findMany({
+    where: { companyInfoId: 1 },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
+
+  const [newestProducts, promotionProducts, heroSlides] = await Promise.all([
     prisma.product.findMany({
       take: 4,
       orderBy: { createdAt: "desc" },
@@ -82,6 +88,7 @@ export default async function HomePage() {
       orderBy: { createdAt: "desc" },
       include: productInclude,
     }),
+    heroSlidesPromise,
   ]);
 
   const newestCards = newestProducts.map(mapProductForCard);
@@ -89,40 +96,20 @@ export default async function HomePage() {
 
   return (
     <section className="space-y-12">
-      <div className="w-full aspect-[16/9] lg:aspect-[21/9] lv-hero-stage overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center p-6 sm:p-10 lg:p-16 lv-fade-in">
-          <div className="max-w-4xl mx-auto text-center space-y-6">
-            <span className="inline-flex lv-hero-pill px-4 py-1.5 text-sm font-normal tracking-[0.4px]">
-              {companyInfo?.companyName || "Digital Catalogue vật liệu xây dựng"}
-            </span>
-
-            <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-normal tracking-[0.4px]">
-                Vật liệu xây dựng chất lượng cho công trình bền vững và hiện đại
-              </h1>
-              <p className="max-w-3xl mx-auto text-sm sm:text-base leading-7 opacity-80 tracking-[0.4px]">
-                {companyInfo?.aboutUs ??
-                  "Chúng tôi cung cấp catalogue điện tử cho gạch ốp lát, ngói và thiết bị vệ sinh với nội dung đang được cập nhật."}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
-              <Link
-                href="/products"
-                className="mhv-btn-primary inline-flex w-full sm:w-auto justify-center px-6 py-3 text-sm font-normal transition-all duration-300 ease-in-out hover:opacity-70 tracking-[0.4px] lv-solid-primary"
-              >
-                Xem danh mục sản phẩm
-              </Link>
-              <Link
-                href="/contact"
-                className="lv-hero-btn-outline inline-flex w-full sm:w-auto justify-center px-6 py-3 text-sm font-normal transition-all duration-300 ease-in-out hover:opacity-70 tracking-[0.4px]"
-              >
-                Gửi yêu cầu tư vấn
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <HomeHeroCarousel
+        slides={heroSlides.map((slide) => ({
+          id: slide.id,
+          imageUrl: slide.imageUrl,
+          heading: slide.heading,
+          subheading: slide.subheading,
+          ctaText: slide.ctaText,
+          ctaLink: slide.ctaLink,
+        }))}
+        fallback={{
+          companyName: companyInfo?.companyName || "",
+          aboutUs: companyInfo?.aboutUs || "",
+        }}
+      />
 
       <div className="max-w-full px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
