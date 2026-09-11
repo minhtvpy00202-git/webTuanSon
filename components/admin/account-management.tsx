@@ -27,7 +27,7 @@ type AccountManagementProps = {
 
 function roleBadgeClass(name: RoleName) {
   if (name === "admin") {
-    return "inline-flex items-center border border-[var(--foreground)] bg-[var(--foreground)] px-2 py-1 text-xs text-[var(--background)] tracking-[0.4px]";
+    return "inline-flex items-center border border-[var(--brand)] bg-[var(--brand)] px-2 py-1 text-xs text-[var(--brand-foreground)] tracking-[0.4px]";
   }
   return "inline-flex items-center border border-[var(--border)] bg-[var(--surface-muted)] px-2 py-1 text-xs text-[var(--foreground)] tracking-[0.4px]";
 }

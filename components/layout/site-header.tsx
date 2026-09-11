@@ -396,7 +396,7 @@ export function SiteHeader({
                   }`}
                 >
                   <nav className="flex flex-col px-4 py-4 sm:px-6">
-                    {navItems.map((item) => {
+                    {navItems.slice(0, 3).map((item) => {
                       const isActive = isNavItemActive(item.href);
                       return (
                         <Link
@@ -433,6 +433,22 @@ export function SiteHeader({
                         />
                       </svg>
                     </button>
+
+                    {navItems.slice(3).map((item) => {
+                      const isActive = isNavItemActive(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMenu}
+                          className={`border-b border-[var(--border)] py-4 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                            isActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
+                          }`}
+                        >
+                          <span className="lv-underline-item">{item.label}</span>
+                        </Link>
+                      );
+                    })}
                   </nav>
 
                   <div className="border-t border-[var(--border)] px-4 py-4 sm:px-6">

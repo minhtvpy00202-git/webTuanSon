@@ -47,7 +47,14 @@ export function ProductGallery({
         />
 
         {isPromotion ? (
-          <span className="absolute top-4 left-4 border border-[var(--foreground)] bg-transparent px-3 py-1 text-xs font-normal text-[var(--foreground)] tracking-[0.4px]">
+          <span
+            className="lv-promotion-badge absolute top-4 left-4 px-4 py-1.5 text-xs"
+            style={{
+              backgroundColor: "#F27025",
+              color: "#ffffff",
+              border: "1px solid #F27025",
+            }}
+          >
             Khuyến mãi
           </span>
         ) : null}

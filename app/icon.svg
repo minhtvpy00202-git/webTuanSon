@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect x="10" y="40" width="44" height="18" fill="#000" stroke="#000" stroke-width="2"/>
-  <rect x="10" y="46" width="8" height="8" fill="#fff"/>
-  <rect x="22" y="46" width="8" height="8" fill="#fff"/>
-  <rect x="34" y="46" width="8" height="8" fill="#fff"/>
-  <rect x="46" y="46" width="8" height="8" fill="#fff"/>
-  <polygon points="6,40 32,14 58,40" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="miter"/>
-  <path d="M20 40 L20 28 L34 28 L34 40 L40 40 L40 22 L48 22 L48 40 Z" fill="#000"/>
-  <text x="32" y="54" text-anchor="middle" font-family="ui-serif, Georgia, serif" font-weight="700" font-size="10" fill="#000" letter-spacing="1.5">TS</text>
+  <rect x="10" y="40" width="44" height="18" fill="#F27025" stroke="#F27025" stroke-width="2"/>
+  <rect x="10" y="46" width="8" height="8" fill="#ffffff"/>
+  <rect x="22" y="46" width="8" height="8" fill="#ffffff"/>
+  <rect x="34" y="46" width="8" height="8" fill="#ffffff"/>
+  <rect x="46" y="46" width="8" height="8" fill="#ffffff"/>
+  <polygon points="6,40 32,14 58,40" fill="none" stroke="#F27025" stroke-width="3" stroke-linejoin="miter"/>
+  <path d="M20 40 L20 28 L34 28 L34 40 L40 40 L40 22 L48 22 L48 40 Z" fill="#F27025"/>
+  <text x="32" y="54" text-anchor="middle" font-family="ui-serif, Georgia, serif" font-weight="700" font-size="10" fill="#ffffff" letter-spacing="1.5">TS</text>
 </svg>

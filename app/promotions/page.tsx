@@ -159,9 +159,9 @@ export default async function PromotionsPage({ searchParams }: PromotionsPagePro
 
   return (
     <ProductListingSection
-      badge="Ưu đãi nổi bật"
-      title="Sản phẩm đang có khuyến mãi"
-      description="Theo dõi các mẫu vật liệu và thiết bị đang có giá ưu đãi để tối ưu chi phí cho công trình của bạn. Bộ lọc danh mục vẫn hoạt động giống trang sản phẩm."
+      badge="Giá ưu đãi"
+      title="Sản phẩm khuyến mãi"
+      description="Giá tốt cho vật liệu & thiết bị công trình."
       categories={categories.map((category) => ({
         id: category.id,
         name: category.name,

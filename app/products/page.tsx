@@ -164,9 +164,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   return (
     <ProductListingSection
-      badge="Danh mục vật liệu xây dựng"
-      title="Sản phẩm nổi bật cho công trình hiện đại"
-      description="Khám phá danh mục gạch ốp lát, ngói và thiết bị vệ sinh. Bạn có thể lọc nhanh theo từng nhóm sản phẩm để tìm đúng mẫu phù hợp với nhu cầu."
+      badge="Vật liệu xây dựng"
+      title="Sản phẩm xây dựng"
+      description="Gạch ốp lát, ngói và thiết bị vệ sinh chính hãng."
       categories={categories.map((category) => ({
         id: category.id,
         name: category.name,

@@ -6,8 +6,10 @@
   --muted: #6b7280;
   --card: #ffffff;
   --border: #e5e5e5;
-  --primary: #000000;
-  --primary-hover: #1f1f1f;
+  --brand: #F27025;
+  --brand-foreground: #ffffff;
+  --primary: #F27025;
+  --primary-hover: #e66020;
   --primary-foreground: #ffffff;
   --surface-muted: #f5f5f5;
   --shadow-soft: none;
@@ -16,14 +18,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #000000;
+    --background: #0f0f0f;
     --foreground: #ffffff;
     --muted: #9ca3af;
-    --card: #111111;
-    --border: #262626;
-    --primary: #ffffff;
-    --primary-hover: #e5e5e5;
-    --primary-foreground: #000000;
+    --card: #1a1a1a;
+    --border: #333333;
+    --brand: #F27025;
+    --brand-foreground: #ffffff;
+    --primary: #F27025;
+    --primary-hover: #e66020;
+    --primary-foreground: #ffffff;
     --surface-muted: #1a1a1a;
     --shadow-soft: none;
     color-scheme: dark;
@@ -59,12 +63,12 @@ a:hover {
 }
 
 ::selection {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(242, 112, 37, 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
   ::selection {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(242, 112, 37, 0.28);
   }
 }
 
@@ -88,9 +92,9 @@ a:hover {
 }
 
 .mhv-btn-primary {
-  background: var(--foreground);
-  color: var(--background);
-  border: 1px solid var(--foreground);
+  background: var(--brand);
+  color: var(--brand-foreground);
+  border: 1px solid var(--brand);
   border-radius: 0;
   transition: all 300ms ease-in-out;
   font-weight: 400;
@@ -98,13 +102,13 @@ a:hover {
 }
 
 .mhv-btn-primary:hover {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 .lv-solid-primary {
-  background: #000000;
-  color: #ffffff;
-  border: 1px solid #000000;
+  background: var(--brand);
+  color: var(--brand-foreground);
+  border: 1px solid var(--brand);
   border-radius: 0;
   transition: opacity 300ms ease-in-out;
   font-weight: 400;
@@ -112,21 +116,21 @@ a:hover {
 }
 
 .lv-solid-primary:hover {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 @media (prefers-color-scheme: dark) {
   .lv-solid-primary {
-    background: #ffffff;
-    color: #000000;
-    border-color: #ffffff;
+    background: var(--brand);
+    color: var(--brand-foreground);
+    border-color: var(--brand);
   }
 }
 
 .lv-chip-active {
-  background: #000000;
-  color: #ffffff;
-  border: 1px solid #000000;
+  background: var(--brand);
+  color: var(--brand-foreground);
+  border: 1px solid var(--brand);
   border-radius: 0;
   transition: opacity 300ms ease-in-out;
   font-weight: 400;
@@ -134,48 +138,70 @@ a:hover {
 }
 
 .lv-chip-active:hover {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 @media (prefers-color-scheme: dark) {
   .lv-chip-active {
-    background: #ffffff;
-    color: #000000;
-    border-color: #ffffff;
+    background: var(--brand);
+    color: var(--brand-foreground);
+    border-color: var(--brand);
+  }
+}
+
+.lv-promotion-badge {
+  background: var(--brand) !important;
+  color: var(--brand-foreground) !important;
+  border: 1px solid var(--brand) !important;
+  border-radius: 0 !important;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  transition: opacity 300ms ease-in-out;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  display: inline-block;
+}
+
+.lv-promotion-badge:hover {
+  opacity: 0.9;
+}
+
+@media (prefers-color-scheme: dark) {
+  .lv-promotion-badge {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
   }
 }
 
 .lv-hero-stage {
-  background: #000000;
-  color: #ffffff;
+  background: var(--brand);
+  color: var(--brand-foreground);
 }
 
 @media (prefers-color-scheme: dark) {
   .lv-hero-stage {
-    background: #000000;
-    color: #ffffff;
-    border: 1px solid #262626;
+    background: var(--brand);
+    color: var(--brand-foreground);
+    border: 1px solid var(--brand);
   }
 }
 
 .lv-hero-pill {
-  border: 1px solid #ffffff;
-  color: #ffffff;
+  border: 1px solid var(--brand-foreground);
+  color: var(--brand-foreground);
   background: transparent;
   transition: opacity 300ms ease-in-out;
 }
 
 @media (prefers-color-scheme: dark) {
   .lv-hero-pill {
-    border-color: #e5e5e5;
-    color: #e5e5e5;
+    border-color: var(--brand-foreground);
+    color: var(--brand-foreground);
   }
 }
 
 .lv-hero-btn-outline {
-  border: 1px solid #ffffff;
+  border: 1px solid var(--brand-foreground);
   background: transparent;
-  color: #ffffff;
+  color: var(--brand-foreground);
   border-radius: 0;
   transition: opacity 300ms ease-in-out;
   font-weight: 400;
@@ -183,13 +209,13 @@ a:hover {
 }
 
 .lv-hero-btn-outline:hover {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 @media (prefers-color-scheme: dark) {
   .lv-hero-btn-outline {
-    border-color: #e5e5e5;
-    color: #e5e5e5;
+    border-color: var(--brand-foreground);
+    color: var(--brand-foreground);
   }
 }
 
