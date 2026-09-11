@@ -323,12 +323,29 @@ a:hover {
   }
 }
 
+@keyframes lv-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lv-reveal,
   .lv-reveal-item,
   .lv-fade-in,
   .lv-slide-left-enter,
   .lv-slide-top-enter,
+  .lv-menu-slide-enter,
+  *[style*="animation-name: lv-fade-in-up"],
+  *[style*="lv-fade-in-up"] {
+    transition: none !important;
+    animation: none !important;
+  }
   .lv-menu-slide-enter {
     animation: none !important;
     transition: none !important;

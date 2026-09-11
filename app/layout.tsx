@@ -9,8 +9,14 @@ import { getAdminSession } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "Tuấn Sơn Materials",
-  description: "Catalogue điện tử cho vật liệu xây dựng, gạch men, ngói và thiết bị vệ sinh.",
+  title: "Vật liệu xây dựng Tuấn Sơn",
+  description: "Catalogue điện tử Vật liệu xây dựng Tuấn Sơn - gạch men, ngói, thiết bị vệ sinh và vật liệu xây dựng chất lượng cao.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/icon.svg" }],
+  },
 };
 
 export const dynamic = "force-dynamic";

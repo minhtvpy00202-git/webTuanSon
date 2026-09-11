@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import LogoTS from "@/components/logo/LogoTS";
+
+import { GlobalSearchClient } from "@/components/layout/global-search-client";
 
 const navItems = [
   { href: "/", label: "Trang chủ" },
@@ -215,19 +216,37 @@ export function SiteHeader({
             </span>
           </button>
 
-          <Link href="/" className="flex flex-1 items-center justify-center transition-all duration-300 ease-in-out hover:opacity-70">
-            <LogoTS className="h-10 w-auto text-[var(--foreground)] sm:h-12 lg:h-14" />
+          <Link href="/" className="flex flex-1 items-center justify-center gap-3 sm:gap-4 transition-all duration-300 ease-in-out hover:opacity-70">
+            <Image
+              src="/icon.svg"
+              alt="Logo Vật liệu xây dựng Tuấn Sơn"
+              width={56}
+              height={56}
+              className="h-10 w-10 shrink-0 sm:h-12 sm:w-12 lg:h-14 lg:w-14"
+              priority
+            />
+            <span
+              className="hidden select-none text-[var(--foreground)] sm:block"
+              style={{
+                fontWeight: 700,
+                letterSpacing: "2.5px",
+                fontFamily:
+                  "Inter, 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif",
+                textTransform: "uppercase",
+                lineHeight: 1,
+              }}
+            >
+              <span className="block whitespace-nowrap text-[11px] leading-none tracking-[3px] sm:text-[13px] sm:tracking-[3.6px] md:text-[15px] md:tracking-[4px] lg:text-[18px] lg:tracking-[5px]">
+                Vật liệu xây dựng Tuấn Sơn
+              </span>
+            </span>
             <span className="sr-only">{displayName}</span>
           </Link>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/products"
-              className="hidden h-11 w-11 items-center justify-center text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70 sm:inline-flex"
-              aria-label="Tìm kiếm"
-            >
-              <SearchIcon />
-            </Link>
+            <div className="hidden sm:block">
+              <GlobalSearchClient variant="topbar" />
+            </div>
 
             {!hasSession ? (
               <Link
@@ -284,13 +303,7 @@ export function SiteHeader({
       </div>
 
       <div className="border-b border-[var(--border)] px-4 py-3 sm:px-6 lg:px-8 lg:hidden">
-        <Link
-          href="/products"
-          className="flex items-center gap-3 border border-[var(--border)] px-4 py-2.5 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
-        >
-          <SearchIcon />
-          <span>Tìm sản phẩm...</span>
-        </Link>
+        <GlobalSearchClient variant="mobile-bar" />
       </div>
 
       {isMenuOpen ? (
@@ -325,9 +338,29 @@ export function SiteHeader({
                   <CloseIcon />
                   <span className="ml-2">Đóng</span>
                 </button>
-                <Link href="/" onClick={closeMenu} className="transition-all duration-300 ease-in-out hover:opacity-70">
-                  <LogoTS className="h-8 w-auto text-[var(--foreground)] sm:h-10" />
-                  <span className="sr-only">{displayName}</span>
+                <Link href="/" onClick={closeMenu} className="flex items-center gap-2 sm:gap-3 transition-all duration-300 ease-in-out hover:opacity-70">
+                  <Image
+                    src="/icon.svg"
+                    alt="Logo Vật liệu xây dựng Tuấn Sơn"
+                    width={40}
+                    height={40}
+                    className="h-8 w-8 shrink-0 sm:h-10 sm:w-10"
+                  />
+                  <span
+                    className="hidden select-none text-[var(--foreground)] sm:block"
+                    style={{
+                      fontWeight: 700,
+                      letterSpacing: "2px",
+                      fontFamily:
+                        "Inter, 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif",
+                      textTransform: "uppercase",
+                      lineHeight: 1,
+                    }}
+                  >
+                    <span className="block whitespace-nowrap text-[10px] leading-none tracking-[2.8px] sm:text-[11px] sm:tracking-[3px]">
+                      Vật liệu xây dựng Tuấn Sơn
+                    </span>
+                  </span>
                 </Link>
                 <div className="w-16" />
               </div>
@@ -348,9 +381,29 @@ export function SiteHeader({
                   <ChevronLeftIcon className="h-5 w-5" />
                   <span className="lv-underline-item">Thể loại</span>
                 </button>
-                <Link href="/" onClick={closeMenu} className="transition-all duration-300 ease-in-out hover:opacity-70">
-                  <LogoTS className="h-8 w-auto text-[var(--foreground)] sm:h-10" />
-                  <span className="sr-only">{displayName}</span>
+                <Link href="/" onClick={closeMenu} className="flex items-center gap-2 sm:gap-3 transition-all duration-300 ease-in-out hover:opacity-70">
+                  <Image
+                    src="/icon.svg"
+                    alt="Logo Vật liệu xây dựng Tuấn Sơn"
+                    width={40}
+                    height={40}
+                    className="h-8 w-8 shrink-0 sm:h-10 sm:w-10"
+                  />
+                  <span
+                    className="hidden select-none text-[var(--foreground)] sm:block"
+                    style={{
+                      fontWeight: 700,
+                      letterSpacing: "2px",
+                      fontFamily:
+                        "Inter, 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif",
+                      textTransform: "uppercase",
+                      lineHeight: 1,
+                    }}
+                  >
+                    <span className="block whitespace-nowrap text-[10px] leading-none tracking-[2.8px] sm:text-[11px] sm:tracking-[3px]">
+                      Vật liệu xây dựng Tuấn Sơn
+                    </span>
+                  </span>
                 </Link>
                 <button
                   type="button"

@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import LogoTS from "@/components/logo/LogoTS";
 
 type NavItem = {
   href: string;
@@ -23,7 +23,13 @@ export function AdminSidebarNav({ items }: AdminSidebarNavProps) {
   return (
     <nav className="flex flex-col gap-2">
       <div className="mb-6 flex flex-col items-center gap-2 border-b border-[var(--border)] pb-5">
-        <LogoTS className="h-10 w-auto text-[var(--foreground)]" />
+        <Image
+          src="/icon.svg"
+          alt="Logo Vật liệu xây dựng Tuấn Sơn"
+          width={40}
+          height={40}
+          className="h-10 w-10 shrink-0"
+        />
         <p className="text-xs font-normal tracking-[0.4px] text-[var(--muted)] text-center">Quản trị nội dung</p>
       </div>
       {items.map((item) => {

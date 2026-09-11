@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
-import LogoTS from "@/components/logo/LogoTS";
 import { AdminLoginForm } from "@/components/admin/admin-login-form";
 import { getAdminSession } from "@/lib/admin-auth";
 
@@ -15,7 +15,15 @@ export default async function AdminLoginPage() {
     <section className="mx-auto max-w-xl space-y-6 py-8">
       <div className="mhv-card p-6 sm:p-8">
         <div className="space-y-3">
-          <LogoTS className="mx-auto h-12 w-auto text-[var(--foreground)] mb-3" />
+          <div className="mb-3 flex justify-center">
+            <Image
+              src="/icon.svg"
+              alt="Logo Vật liệu xây dựng Tuấn Sơn"
+              width={48}
+              height={48}
+              className="h-12 w-12 shrink-0 mx-auto"
+            />
+          </div>
           <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px] text-center">Khu vực quản trị</p>
           <h1 className="text-3xl font-normal text-[var(--foreground)] tracking-[0.4px]">
             Đăng nhập để quản lý catalogue
