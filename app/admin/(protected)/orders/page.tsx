@@ -18,7 +18,7 @@ const VALID_SORT: Record<string, SortColumn> = {
   createdAt: "createdAt",
 };
 
-const SORT_LABELS: Record<SortColumn, string> & { id: never } = {
+const SORT_LABELS: Record<SortColumn, string> = {
   customerName: "Họ tên",
   customerPhone: "Số điện thoại",
   orderKind: "Loại đơn",

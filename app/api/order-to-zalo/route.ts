@@ -6,15 +6,69 @@ import { Prisma } from "@prisma/client";
 import { getSupabaseStorageAdminClient } from "@/lib/supabase-storage";
 import { prisma } from "@/lib/prisma";
 
-const STATIC_DATA_DIR = path.join(process.cwd(), "public", "static", "pdfkit-data");
-const MODULE_DATA_DIR = path.join(
-  process.cwd(),
-  "node_modules",
-  "pdfkit",
-  "js",
-  "data",
+function staticPdfkitDataPath(
+  sub: "public-static" | "node_modules",
+  fileName: string,
+): string {
+  const root = process.cwd();
+  if (sub === "public-static") {
+    return (
+      root +
+      (root.endsWith("/") || root.endsWith("\\") ? "" : path.sep) +
+      "public" +
+      path.sep +
+      "static" +
+      path.sep +
+      "pdfkit-data" +
+      path.sep +
+      fileName
+    );
+  }
+  return (
+    root +
+    (root.endsWith("/") || root.endsWith("\\") ? "" : path.sep) +
+    "node_modules" +
+    path.sep +
+    "pdfkit" +
+    path.sep +
+    "js" +
+    path.sep +
+    "data" +
+    path.sep +
+    fileName
+  );
+}
+
+const STATIC_PROBE = staticPdfkitDataPath(
+  "public-static",
+  "Helvetica.afm",
+  /*turbopackIgnore: true*/
 );
-const DATA_DIR = fs.existsSync(STATIC_DATA_DIR) ? STATIC_DATA_DIR : MODULE_DATA_DIR;
+const PREFERRED_DIR: "public-static" | "node_modules" = fs.existsSync(
+  STATIC_PROBE,
+  /*turbopackIgnore: true*/
+)
+  ? "public-static"
+  : "node_modules";
+
+function dataFile(fileName: string): string {
+  return staticPdfkitDataPath(PREFERRED_DIR, fileName);
+}
+
+function tryReadUtf8(filePath: string): string | null {
+  try {
+    return fs.readFileSync(filePath, "utf8", /*turbopackIgnore: true*/);
+  } catch {
+    return null;
+  }
+}
+function tryReadBuffer(filePath: string): Buffer | null {
+  try {
+    return fs.readFileSync(filePath, /*turbopackIgnore: true*/);
+  } catch {
+    return null;
+  }
+}
 
 const AFM_FILES = [
   "Courier.afm",
@@ -35,21 +89,14 @@ const AFM_FILES = [
 
 const STANDARD_FONT_DATA: Record<string, string> = {};
 for (const name of AFM_FILES) {
-  const p = path.join(DATA_DIR, name);
-  if (fs.existsSync(p)) {
-    try {
-      STANDARD_FONT_DATA[name] = fs.readFileSync(p, "utf8");
-    } catch {}
-  }
+  const content = tryReadUtf8(dataFile(name));
+  if (content) STANDARD_FONT_DATA[name] = content;
 }
-const SRGB_ICC_PATH = path.join(DATA_DIR, "sRGB_IEC61966_2_1.icc");
-const SRGB_ICC_BUF = (() => {
-  try {
-    return fs.readFileSync(SRGB_ICC_PATH);
-  } catch {
-    return null;
-  }
-})();
+
+const SRGB_ICC_BUF = tryReadBuffer(
+  dataFile("sRGB_IEC61966_2_1.icc"),
+  /*turbopackIgnore: true*/
+);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fsNode = require("node:fs") as typeof import("node:fs");
@@ -129,23 +176,29 @@ function formatVnDateTime(d: Date): string {
   )}:${pad2(d.getMinutes())}`;
 }
 
-const FONT_DIR = path.join(process.cwd(), "node_modules", "dejavu-fonts-ttf", "ttf");
-const FONT_REGULAR = path.join(FONT_DIR, "DejaVuSans.ttf");
-const FONT_BOLD = path.join(FONT_DIR, "DejaVuSans-Bold.ttf");
-const DEJAVU_REGULAR_BUF = (() => {
-  try {
-    return fs.readFileSync(FONT_REGULAR);
-  } catch {
-    return null;
-  }
-})();
-const DEJAVU_BOLD_BUF = (() => {
-  try {
-    return fs.readFileSync(FONT_BOLD);
-  } catch {
-    return null;
-  }
-})();
+function dejavuFontFile(fileName: string): string {
+  const root = process.cwd();
+  return (
+    root +
+    (root.endsWith("/") || root.endsWith("\\") ? "" : path.sep) +
+    "node_modules" +
+    path.sep +
+    "dejavu-fonts-ttf" +
+    path.sep +
+    "ttf" +
+    path.sep +
+    fileName
+  );
+}
+
+const DEJAVU_REGULAR_BUF = tryReadBuffer(
+  dejavuFontFile("DejaVuSans.ttf"),
+  /*turbopackIgnore: true*/
+);
+const DEJAVU_BOLD_BUF = tryReadBuffer(
+  dejavuFontFile("DejaVuSans-Bold.ttf"),
+  /*turbopackIgnore: true*/
+);
 const HAS_DEJAVU = !!(DEJAVU_REGULAR_BUF && DEJAVU_BOLD_BUF);
 
 function registerFonts(doc: any): { family: string; familyBold: string } {
