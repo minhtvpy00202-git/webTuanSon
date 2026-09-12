@@ -39,6 +39,35 @@ function staticPdfkitDataPath(
   );
 }
 
+function staticFontkitTriePath(
+  sub: "public-static" | "node_modules",
+  fileName: string,
+): string {
+  const root = process.cwd();
+  if (sub === "public-static") {
+    return (
+      root +
+      (root.endsWith("/") || root.endsWith("\\") ? "" : path.sep) +
+      "public" +
+      path.sep +
+      "static" +
+      path.sep +
+      "fontkit-data" +
+      path.sep +
+      fileName
+    );
+  }
+  return (
+    root +
+    (root.endsWith("/") || root.endsWith("\\") ? "" : path.sep) +
+    "node_modules" +
+    path.sep +
+    "fontkit" +
+    path.sep +
+    fileName
+  );
+}
+
 const STATIC_PROBE = staticPdfkitDataPath(
   "public-static",
   "Helvetica.afm",
@@ -53,6 +82,22 @@ const PREFERRED_DIR: "public-static" | "node_modules" = fs.existsSync(
 
 function dataFile(fileName: string): string {
   return staticPdfkitDataPath(PREFERRED_DIR, fileName);
+}
+
+const FONTKIT_TRIE_PROBE = staticFontkitTriePath(
+  "public-static",
+  "data.trie",
+  /*turbopackIgnore: true*/
+);
+const FONTKIT_TRIE_PREF_DIR: "public-static" | "node_modules" = fs.existsSync(
+  FONTKIT_TRIE_PROBE,
+  /*turbopackIgnore: true*/
+)
+  ? "public-static"
+  : "node_modules";
+
+function fontkitTrieFile(fileName: string): string {
+  return staticFontkitTriePath(FONTKIT_TRIE_PREF_DIR, fileName);
 }
 
 function tryReadUtf8(filePath: string): string | null {
@@ -98,6 +143,16 @@ const SRGB_ICC_BUF = tryReadBuffer(
   /*turbopackIgnore: true*/
 );
 
+const FONTKIT_TRIE_FILES = ["data.trie", "indic.trie", "use.trie"] as const;
+const FONTKIT_TRIE_DATA: Record<string, Buffer> = {};
+for (const name of FONTKIT_TRIE_FILES) {
+  const buf = tryReadBuffer(
+    fontkitTrieFile(name),
+    /*turbopackIgnore: true*/
+  );
+  if (buf) FONTKIT_TRIE_DATA[name] = buf;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fsNode = require("node:fs") as typeof import("node:fs");
 const origReadFileSync = fsNode.readFileSync;
@@ -107,7 +162,7 @@ function patchedReadFileSync(
   options?: any,
 ): any {
   if (typeof pathArg === "string") {
-    const m = pathArg.match(/[\\/]([^\\/]+?\.(?:afm|icc))$/i);
+    const m = pathArg.match(/[\\/]([^\\/]+?\.(?:afm|icc|trie))$/i);
     if (m) {
       const fn = m[1];
       if (fn.toLowerCase().endsWith(".afm")) {
@@ -122,6 +177,8 @@ function patchedReadFileSync(
         }
       } else if (fn.toLowerCase() === "srgb_iec61966_2_1.icc") {
         if (SRGB_ICC_BUF) return SRGB_ICC_BUF;
+      } else if (fn.toLowerCase().endsWith(".trie")) {
+        if (FONTKIT_TRIE_DATA[fn]) return FONTKIT_TRIE_DATA[fn];
       }
     }
   }
@@ -176,38 +233,38 @@ function formatVnDateTime(d: Date): string {
   )}:${pad2(d.getMinutes())}`;
 }
 
-function dejavuFontFile(fileName: string): string {
+function publicFontFile(fileName: string): string {
   const root = process.cwd();
   return (
     root +
     (root.endsWith("/") || root.endsWith("\\") ? "" : path.sep) +
-    "node_modules" +
+    "public" +
     path.sep +
-    "dejavu-fonts-ttf" +
-    path.sep +
-    "ttf" +
+    "fonts" +
     path.sep +
     fileName
   );
 }
 
 const DEJAVU_REGULAR_BUF = tryReadBuffer(
-  dejavuFontFile("DejaVuSans.ttf"),
+  publicFontFile("DejaVuSans.ttf"),
   /*turbopackIgnore: true*/
 );
 const DEJAVU_BOLD_BUF = tryReadBuffer(
-  dejavuFontFile("DejaVuSans-Bold.ttf"),
+  publicFontFile("DejaVuSans-Bold.ttf"),
   /*turbopackIgnore: true*/
 );
 const HAS_DEJAVU = !!(DEJAVU_REGULAR_BUF && DEJAVU_BOLD_BUF);
 
 function registerFonts(doc: any): { family: string; familyBold: string } {
   if (HAS_DEJAVU && DEJAVU_REGULAR_BUF && DEJAVU_BOLD_BUF) {
-    doc.registerFont("DejaVuSans", DEJAVU_REGULAR_BUF);
-    doc.registerFont("DejaVuSans-Bold", DEJAVU_BOLD_BUF);
+    doc.registerFont("DejaVuSans", DEJAVU_REGULAR_BUF, "DejaVu Sans");
+    doc.registerFont("DejaVuSans-Bold", DEJAVU_BOLD_BUF, "DejaVu Sans Bold");
     return { family: "DejaVuSans", familyBold: "DejaVuSans-Bold" };
   }
-  return { family: "Helvetica", familyBold: "Helvetica-Bold" };
+  throw new Error(
+    "Không tìm thấy font hỗ trợ tiếng Việt (public/fonts/DejaVuSans.ttf). Không thể tạo PDF đơn hàng.",
+  );
 }
 
 function buildZaloMessage(params: {
@@ -375,13 +432,17 @@ async function generateOrderPdf(params: {
   heading("DANH SÁCH SẢN PHẨM", { size: 12, color: "#0f172a" });
   doc.moveDown(0.25);
 
-  const COL = {
-    stt: PAGE_LEFT,
-    name: PAGE_LEFT + 28,
-    qty: PAGE_RIGHT - 270,
-    price: PAGE_RIGHT - 170,
-    amount: PAGE_RIGHT - 105,
-  };
+  const COL_STT_W = 32;
+  const COL_QTY_W = 70;
+  const COL_PRICE_W = 95;
+  const COL_AMOUNT_W = 105;
+  const COL_GAP = 8;
+  const COL_STT_X = PAGE_LEFT;
+  const COL_AMOUNT_X = PAGE_RIGHT - COL_AMOUNT_W;
+  const COL_PRICE_X = COL_AMOUNT_X - COL_GAP - COL_PRICE_W;
+  const COL_QTY_X = COL_PRICE_X - COL_GAP - COL_QTY_W;
+  const COL_NAME_X = COL_STT_X + COL_STT_W + COL_GAP;
+  const COL_NAME_W = COL_QTY_X - COL_GAP - COL_NAME_X;
 
   // Header row
   const headerY = doc.y;
@@ -393,21 +454,21 @@ async function generateOrderPdf(params: {
     .fillColor("#ffffff")
     .font(fonts.familyBold)
     .fontSize(11);
-  doc.text("STT", COL.stt, headerY + 5, { width: 28, align: "center" });
-  doc.text("Tên sản phẩm / Mã", COL.name, headerY + 5, {
-    width: COL.qty - COL.name - 10,
+  doc.text("STT", COL_STT_X, headerY + 5, { width: COL_STT_W, align: "center" });
+  doc.text("Tên sản phẩm / Mã", COL_NAME_X, headerY + 5, {
+    width: COL_NAME_W,
     align: "left",
   });
-  doc.text("SL/ĐV", COL.qty, headerY + 5, {
-    width: COL.price - COL.qty - 10,
+  doc.text("SL/ĐV", COL_QTY_X, headerY + 5, {
+    width: COL_QTY_W,
     align: "left",
   });
-  doc.text("Đơn giá", COL.price, headerY + 5, {
-    width: COL.amount - COL.price - 10,
+  doc.text("Đơn giá", COL_PRICE_X, headerY + 5, {
+    width: COL_PRICE_W,
     align: "right",
   });
-  doc.text("Thành tiền", COL.amount, headerY + 5, {
-    width: PAGE_RIGHT - COL.amount,
+  doc.text("Thành tiền", COL_AMOUNT_X, headerY + 5, {
+    width: COL_AMOUNT_W,
     align: "right",
   });
   doc.y = headerY + 26;
@@ -426,10 +487,10 @@ async function generateOrderPdf(params: {
     const codeTxt = l.productCode ? "Mã: " + l.productCode : "";
 
     doc.font(fonts.family).fontSize(11).fillColor("#374151");
-    doc.text(String(idx + 1), COL.stt, rowY + 2, { width: 28, align: "center" });
+    doc.text(String(idx + 1), COL_STT_X, rowY + 2, { width: COL_STT_W, align: "center" });
 
-    const nameColX = COL.name;
-    const nameColW = COL.qty - COL.name - 10;
+    const nameColX = COL_NAME_X;
+    const nameColW = COL_NAME_W;
     doc.fillColor("#0f172a").font(fonts.familyBold).fontSize(11);
     doc.text(nameTxt, nameColX, rowY + 2, { width: nameColW, align: "left" });
     const afterNameY = doc.y;
@@ -442,20 +503,20 @@ async function generateOrderPdf(params: {
       .fillColor("#111827")
       .font(fonts.family)
       .fontSize(11)
-      .text(qty.toLocaleString("vi-VN") + unit, COL.qty, rowY + 2, {
-        width: COL.price - COL.qty - 10,
+      .text(qty.toLocaleString("vi-VN") + unit, COL_QTY_X, rowY + 2, {
+        width: COL_QTY_W,
         align: "left",
       });
-    doc.text(formatCurrencyVN(unitPrice), COL.price, rowY + 2, {
-      width: COL.amount - COL.price - 10,
+    doc.text(formatCurrencyVN(unitPrice), COL_PRICE_X, rowY + 2, {
+      width: COL_PRICE_W,
       align: "right",
     });
     doc
       .fillColor("#F27025")
       .font(fonts.familyBold)
       .fontSize(11.5)
-      .text(formatCurrencyVN(amount), COL.amount, rowY + 2, {
-        width: PAGE_RIGHT - COL.amount,
+      .text(formatCurrencyVN(amount), COL_AMOUNT_X, rowY + 2, {
+        width: COL_AMOUNT_W,
         align: "right",
       });
 
