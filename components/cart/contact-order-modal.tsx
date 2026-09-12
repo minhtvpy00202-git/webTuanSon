@@ -96,6 +96,7 @@ export function ContactOrderModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitResult | null>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const openedRef = useRef(false);
 
   useEffect(() => {
@@ -119,6 +120,54 @@ export function ContactOrderModal({
   const phoneValid = /^\s*(?:\+?84|0)\d{9,10}\s*$/.test(customerPhone);
   const nameValid = customerName.trim().length >= 2;
   const formValid = nameValid && phoneValid && lines.length > 0;
+
+  async function triggerPdfDownload(publicPdfUrl: string) {
+    try {
+      setDownloadingPdf(true);
+      setError(null);
+      const resp = await fetch(publicPdfUrl, { method: "GET", mode: "cors" });
+      if (!resp.ok) {
+        throw new Error(`Không thể tải file (HTTP ${resp.status}).`);
+      }
+      const blob = await resp.blob();
+      const urlObj = URL.createObjectURL(blob);
+      try {
+        const fallback = `don-dat-hang-${Date.now()}.pdf`;
+        let suggested = fallback;
+        try {
+          const u = new URL(publicPdfUrl);
+          const seg = u.pathname.split("/").filter(Boolean).pop();
+          if (seg) {
+            const dec = decodeURIComponent(seg);
+            if (dec && /\.pdf$/i.test(dec)) suggested = dec;
+            else if (dec) suggested = dec + ".pdf";
+          }
+        } catch {}
+        const a = document.createElement("a");
+        a.href = urlObj;
+        a.download = suggested;
+        a.rel = "noopener";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } finally {
+        setTimeout(() => {
+          try {
+            URL.revokeObjectURL(urlObj);
+          } catch {}
+        }, 4000);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Không thể tải file PDF đơn hàng.";
+      setError(msg);
+      try {
+        window.open(publicPdfUrl, "_blank", "noopener,noreferrer");
+      } catch {}
+    } finally {
+      setDownloadingPdf(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -209,14 +258,17 @@ export function ContactOrderModal({
 
           <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-col-reverse sm:gap-3">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <a
-                href={result.publicPdfUrl}
-                download
-                className="mhv-btn-secondary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 py-3 text-sm transition-all duration-300 hover:bg-[var(--surface-muted)]"
+              <button
+                type="button"
+                onClick={() => triggerPdfDownload(result.publicPdfUrl)}
+                disabled={downloadingPdf}
+                className="mhv-btn-secondary inline-flex min-h-[48px] items-center justify-center gap-2 px-5 py-3 text-sm transition-all duration-300 hover:bg-[var(--surface-muted)] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <span className="inline-flex items-center justify-center text-base leading-none">⬇</span>
-                <span>Tải PDF đơn hàng</span>
-              </a>
+                <span className="inline-flex items-center justify-center text-base leading-none">
+                  {downloadingPdf ? "…" : "⬇"}
+                </span>
+                <span>{downloadingPdf ? "Đang tải PDF..." : "Tải PDF đơn hàng"}</span>
+              </button>
               <Link
                 href={result.publicPdfUrl}
                 target="_blank"
