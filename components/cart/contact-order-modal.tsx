@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AdminModal } from "@/components/admin/admin-modal";
 import { formatCurrency } from "@/lib/format";
+import { useCart } from "@/components/cart/cart-context";
 
 export type OrderLine = {
   productId: number;
@@ -90,6 +91,7 @@ export function ContactOrderModal({
   totalAmount,
   singleProductName,
 }: ContactOrderModalProps) {
+  const { clearCart, removeItem } = useCart();
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [touched, setTouched] = useState<{ name?: boolean; phone?: boolean }>({});
@@ -203,6 +205,16 @@ export function ContactOrderModal({
       }
       const json = (await resp.json()) as SubmitResult;
       setResult(json);
+
+      try {
+        if (mode === "cart") {
+          clearCart();
+        } else if (mode === "single") {
+          for (const l of lines) {
+            if (l.productId) removeItem(l.productId);
+          }
+        }
+      } catch {}
 
       try {
         void json;
