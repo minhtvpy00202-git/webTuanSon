@@ -133,19 +133,20 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="grid grid-cols-2 gap-2 pt-1">
           <Link
             href={`/products/${product.id}`}
-            className="mhv-button-secondary justify-center"
+            className="mhv-btn-secondary inline-flex h-11 min-h-[44px] w-full shrink-0 items-center justify-center gap-1 whitespace-nowrap px-2 text-sm tracking-[0.4px] transition-all duration-300 hover:opacity-85"
           >
-            Xem chi tiết
+            <span className="hidden sm:inline">Xem chi tiết</span>
+            <span className="sm:hidden line-clamp-1 truncate">Chi tiết</span>
           </Link>
           <button
             type="button"
             onClick={handleAddToCart}
-            className="mhv-button-primary justify-center !px-2"
+            className="mhv-btn-primary inline-flex h-11 min-h-[44px] w-full shrink-0 items-center justify-center gap-1 whitespace-nowrap px-2 text-sm tracking-[0.4px] transition-all duration-300 hover:opacity-85"
             style={{ backgroundColor: "#F27025", borderColor: "#F27025", color: "#ffffff" }}
           >
             <span className="hidden sm:inline">Thêm vào giỏ</span>
             <span className="inline-flex sm:hidden items-center justify-center gap-1">
-              <CartPlusIcon className="h-4 w-4" />
+              <CartPlusIcon className="h-4 w-4 shrink-0" />
               <span>Giỏ</span>
             </span>
           </button>
