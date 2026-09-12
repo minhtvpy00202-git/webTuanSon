@@ -6,6 +6,7 @@ import { AdminSidebarNav } from "@/components/admin/admin-sidebar-nav";
 import { getAdminSession } from "@/lib/admin-auth";
 
 const navItems = [
+  { href: "/admin/orders", label: "Quản lý đơn đặt hàng" },
   { href: "/admin/products", label: "Quản lý sản phẩm" },
   { href: "/admin/categories", label: "Quản lý loại sản phẩm" },
   { href: "/admin/accounts", label: "Quản lý tài khoản" },

@@ -44,6 +44,30 @@ function expandSlugsToIds(
   return Array.from(resultIds);
 }
 
+function computeDescendantCounts(
+  flat: ListingCategoryFlat[],
+): Map<number, number> {
+  const counts = new Map<number, number>();
+  const childIdsByParent = new Map<number | null, number[]>();
+  for (const c of flat) {
+    counts.set(c.id, c.productCount);
+    const k = c.parentId ?? null;
+    if (!childIdsByParent.has(k)) childIdsByParent.set(k, []);
+    childIdsByParent.get(k)!.push(c.id);
+  }
+  function sumFrom(nodeId: number): number {
+    let total = counts.get(nodeId) ?? 0;
+    const children = childIdsByParent.get(nodeId) ?? [];
+    for (const ch of children) total += sumFrom(ch);
+    counts.set(nodeId, total);
+    return total;
+  }
+  for (const rootId of childIdsByParent.get(null) ?? []) {
+    sumFrom(rootId);
+  }
+  return counts;
+}
+
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const singleCategory = resolvedSearchParams?.category;
@@ -96,12 +120,21 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   });
 
   const flatCategories = await flatCategoriesPromise;
+  const descendantCounts = computeDescendantCounts(
+    flatCategories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      parentId: c.parentId,
+      productCount: c._count.products,
+    })),
+  );
   const rawCategories: ListingCategoryFlat[] = flatCategories.map((c) => ({
     id: c.id,
     name: c.name,
     slug: c.slug,
     parentId: c.parentId,
-    productCount: c._count.products,
+    productCount: descendantCounts.get(c.id) ?? c._count.products,
   }));
 
   const selectedCategoryIds = expandSlugsToIds(selectedCategories, rawCategories);

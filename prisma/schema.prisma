@@ -178,3 +178,22 @@ model HeroSlide {
   @@index([companyInfoId, sortOrder])
   @@map("hero_slides")
 }
+
+model CustomerOrder {
+  id             Int      @id @default(autoincrement())
+  customerName   String
+  customerPhone  String
+  orderKind      String   @default("cart")
+  note           String?
+  totalAmount    Decimal  @db.Decimal(14, 2)
+  pdfPublicUrl   String
+  pdfStoragePath String
+  linesRaw       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([customerName])
+  @@index([customerPhone])
+  @@index([orderKind])
+  @@map("customer_orders")
+}

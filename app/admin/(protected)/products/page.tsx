@@ -47,6 +47,8 @@ export default async function AdminProductsPage() {
       categories={categories.map((category) => ({
         id: category.id,
         name: category.name,
+        parentId: category.parentId,
+        sortOrder: category.sortOrder,
         units: category.units.map((unit) => ({
           id: unit.id,
           label: unit.label,

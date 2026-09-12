@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import "./globals.css";
 
+import { CartProvider } from "@/components/cart/cart-context";
 import { FloatingContactButton } from "@/components/layout/floating-contact-button";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getAdminSession } from "@/lib/admin-auth";
@@ -155,20 +156,22 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="vi">
       <body className="antialiased">
-        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-normal tracking-[0.4px]">
-          <SiteHeader
-            companyName={companyInfo?.companyName}
-            session={session}
-            categories={categories}
-            featuredCategoryProducts={featuredCategoryProducts}
-          />
-          <main className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</main>
-          <FloatingContactButton
-            phone={companyInfo?.phone}
-            email={companyInfo?.email}
-            zaloLink={companyInfo?.zaloLink}
-          />
-        </div>
+        <CartProvider>
+          <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-normal tracking-[0.4px]">
+            <SiteHeader
+              companyName={companyInfo?.companyName}
+              session={session}
+              categories={categories}
+              featuredCategoryProducts={featuredCategoryProducts}
+            />
+            <main className="mx-auto w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-10">{children}</main>
+            <FloatingContactButton
+              phone={companyInfo?.phone}
+              email={companyInfo?.email}
+              zaloLink={companyInfo?.zaloLink}
+            />
+          </div>
+        </CartProvider>
       </body>
     </html>
   );

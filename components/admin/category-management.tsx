@@ -34,6 +34,12 @@ type CategoryManagementProps = {
   parentOptions?: ParentOption[];
 };
 
+type TreeRow = CategoryRow & {
+  level: number;
+  hasChildren: boolean;
+  isLeaf: boolean;
+};
+
 function PencilIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
@@ -62,6 +68,58 @@ function TrashIcon() {
   );
 }
 
+function buildTreeRows(
+  flatList: CategoryRow[],
+  expanded: Set<number>,
+  keyword: string,
+): TreeRow[] {
+  const result: TreeRow[] = [];
+  const byParent = new Map<number | null, CategoryRow[]>();
+
+  for (const c of flatList) {
+    const k = c.parentId ?? null;
+    if (!byParent.has(k)) byParent.set(k, []);
+    byParent.get(k)!.push(c);
+  }
+
+  for (const list of byParent.values()) {
+    list.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
+  }
+
+  function matchOrDescendantMatch(cat: CategoryRow): boolean {
+    if (!keyword) return true;
+    const kw = keyword.toLowerCase();
+    if (
+      cat.name.toLowerCase().includes(kw) ||
+      cat.slug.toLowerCase().includes(kw)
+    ) {
+      return true;
+    }
+    const children = byParent.get(cat.id) ?? [];
+    return children.some(matchOrDescendantMatch);
+  }
+
+  function walk(parentId: number | null, level: number) {
+    const children = byParent.get(parentId) ?? [];
+    for (const child of children) {
+      if (keyword && !matchOrDescendantMatch(child)) continue;
+      const grandChildren = byParent.get(child.id) ?? [];
+      result.push({
+        ...child,
+        level,
+        hasChildren: grandChildren.length > 0,
+        isLeaf: grandChildren.length === 0,
+      });
+      if (grandChildren.length > 0 && (expanded.has(child.id) || keyword)) {
+        walk(child.id, level + 1);
+      }
+    }
+  }
+
+  walk(null, 0);
+  return result;
+}
+
 export function CategoryManagement({
   categories,
   parentOptions = [],
@@ -71,20 +129,24 @@ export function CategoryManagement({
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<CategoryRow | null>(null);
   const [deletingCategory, setDeletingCategory] = useState<CategoryRow | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
-  const filteredCategories = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
+  function toggleExpand(id: number) {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
 
-    if (!keyword) {
-      return categories;
-    }
-
-    return categories.filter((category) =>
-      [category.name, category.slug].some((value) =>
-        value.toLowerCase().includes(keyword),
-      ),
-    );
-  }, [categories, search]);
+  const filteredTree = useMemo(() => {
+    const keyword = search.trim();
+    return buildTreeRows(categories, expandedRows, keyword);
+  }, [categories, expandedRows, search]);
 
   async function handleDeleteCategory() {
     if (!deletingCategory) {
@@ -120,7 +182,7 @@ export function CategoryManagement({
             </h2>
             <p className="text-sm font-normal leading-6 text-[var(--muted)] tracking-[0.4px]">
               Theo dõi danh mục hiện có, tìm kiếm nhanh và thao tác trực tiếp bằng
-              modal.
+              modal. Bấm dấu (+) để mở các thể loại con.
             </p>
           </div>
 
@@ -151,7 +213,7 @@ export function CategoryManagement({
               Danh sách loại sản phẩm
             </p>
             <p className="text-sm font-normal text-[var(--muted)] tracking-[0.4px]">
-              Hiển thị {filteredCategories.length} / {categories.length} loại sản phẩm
+              Hiển thị {filteredTree.length} / {categories.length} loại sản phẩm
             </p>
           </div>
         </div>
@@ -160,7 +222,9 @@ export function CategoryManagement({
           <table className="min-w-full divide-y divide-[var(--border)] text-sm">
             <thead className="bg-[var(--surface-muted)] text-left text-[var(--foreground)]">
               <tr>
-                <th className="px-6 py-4 font-normal tracking-[0.4px]">Tên loại</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]" style={{ width: "28%" }}>
+                  Tên loại
+                </th>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Slug</th>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Nhóm cha</th>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Thứ tự</th>
@@ -170,74 +234,109 @@ export function CategoryManagement({
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)] bg-[var(--card)]">
-              {filteredCategories.length ? (
-                filteredCategories.map((category) => (
-                  <tr
-                    key={category.id}
-                    className="transition-colors duration-200 hover:bg-[var(--surface-muted)]"
-                  >
-                    <td className="px-6 py-4 font-normal text-[var(--foreground)] tracking-[0.4px]">
-                      {category.name}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
-                      {category.slug}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
-                      {category.parentName ?? (
-                        <span className="inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground)]">
-                          Nhóm gốc
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
-                      {category.sortOrder}
-                    </td>
-                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
-                      <div className="flex flex-wrap gap-2">
-                        {category.units.length ? (
-                          category.units.map((unit) => (
-                            <span
-                              key={unit.id}
-                              className={`inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] ${
-                                unit.isDefault
-                                  ? "mhv-chip"
-                                  : "border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
-                              }`}
+              {filteredTree.length ? (
+                filteredTree.map((row) => {
+                  const isExpanded = expandedRows.has(row.id);
+                  return (
+                    <tr
+                      key={row.id}
+                      className="transition-colors duration-200 hover:bg-[var(--surface-muted)]"
+                    >
+                      <td
+                        className="px-6 py-4 font-normal text-[var(--foreground)] tracking-[0.4px]"
+                        style={{ paddingLeft: `${16 + row.level * 20}px` }}
+                      >
+                        <div className="flex items-center gap-2">
+                          {row.hasChildren ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpand(row.id)}
+                              aria-expanded={isExpanded}
+                              aria-label={
+                                isExpanded
+                                  ? `Thu gọn ${row.name}`
+                                  : `Mở rộng ${row.name}`
+                              }
+                              className="flex h-6 w-6 shrink-0 items-center justify-center border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] transition-all duration-200 ease-in-out hover:bg-[var(--surface-muted)] hover:opacity-70"
                             >
-                              {unit.label}
-                              {unit.isDefault ? " (mặc định)" : ""}
-                            </span>
-                          ))
-                        ) : (
-                          <span className="text-xs font-normal text-[var(--muted)] tracking-[0.4px]">Chưa cấu hình</span>
+                              <span className="text-sm leading-none font-normal">
+                                {isExpanded ? "−" : "+"}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="h-6 w-6 shrink-0" />
+                          )}
+                          <span
+                            className={
+                              row.level === 0
+                                ? "text-base font-medium"
+                                : "font-normal"
+                            }
+                          >
+                            {row.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                        {row.slug}
+                      </td>
+                      <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                        {row.parentName ?? (
+                          <span className="inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground)]">
+                            Nhóm gốc
+                          </span>
                         )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
-                      {category.productCount} sản phẩm
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setEditingCategory(category)}
-                          className="mhv-btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
-                        >
-                          <PencilIcon />
-                          Chỉnh sửa
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeletingCategory(category)}
-                          className="inline-flex items-center gap-2 border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-normal text-red-600 transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
-                        >
-                          <TrashIcon />
-                          Xóa
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                        {row.sortOrder}
+                      </td>
+                      <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                        <div className="flex flex-wrap gap-2">
+                          {row.units.length ? (
+                            row.units.map((unit) => (
+                              <span
+                                key={unit.id}
+                                className={`inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] ${
+                                  unit.isDefault
+                                    ? "mhv-chip"
+                                    : "border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
+                                }`}
+                              >
+                                {unit.label}
+                                {unit.isDefault ? " (mặc định)" : ""}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs font-normal text-[var(--muted)] tracking-[0.4px]">Chưa cấu hình</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                        {row.productCount} sản phẩm
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingCategory(row)}
+                            className="mhv-btn-secondary inline-flex items-center gap-2 px-3 py-2 text-xs font-normal transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
+                          >
+                            <PencilIcon />
+                            Chỉnh sửa
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeletingCategory(row)}
+                            className="inline-flex items-center gap-2 border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-normal text-red-600 transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
+                          >
+                            <TrashIcon />
+                            Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td

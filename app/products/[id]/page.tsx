@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ProductDetailActionBar } from "@/components/products/product-detail-action-bar";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductPriceSelector } from "@/components/products/product-price-selector";
 import { getPrimaryUnitPrice, resolveUnitPrices } from "@/lib/product-pricing";
@@ -71,6 +72,20 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     })),
   );
   const primaryUnitPrice = getPrimaryUnitPrice(resolvedUnitPrices);
+  const actionLabel =
+    primaryUnitPrice?.label || "";
+  const actionPrice =
+    primaryUnitPrice?.price != null && String(primaryUnitPrice.price) !== ""
+      ? Number(primaryUnitPrice.price)
+      : Number(product.price) || 0;
+  const actionDiscount =
+    primaryUnitPrice?.discountPrice != null &&
+    String(primaryUnitPrice.discountPrice) !== ""
+      ? Number(primaryUnitPrice.discountPrice)
+      : product.discountPrice != null
+        ? Number(product.discountPrice) || 0
+        : null;
+  const displayDiscount = actionDiscount && actionDiscount > 0 ? actionDiscount : null;
 
   return (
     <section className="space-y-6">
@@ -144,6 +159,18 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
               </p>
             </div>
           </div>
+
+          <ProductDetailActionBar
+            product={{
+              id: product.id,
+              name: product.name,
+              productCode: product.productCode,
+              imageUrl: product.imageUrl,
+            }}
+            unitLabel={actionLabel}
+            unitPrice={actionPrice}
+            discountPrice={displayDiscount}
+          />
 
           <div className="flex flex-wrap gap-3">
             <Link

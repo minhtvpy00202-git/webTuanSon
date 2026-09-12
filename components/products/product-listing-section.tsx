@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { ProductAdvancedFilter } from "@/components/products/product-advanced-filter";
@@ -115,6 +116,37 @@ export function ProductListingSection({
     return selectedCategory ? [selectedCategory] : [];
   }, [selectedCategories, selectedCategory]);
 
+  const rootCategoryChips = useMemo(() => {
+    return categories.filter((c) => c.parentId === null);
+  }, [categories]);
+
+  function buildChipHref(categorySlug: string | "ALL") {
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    params.delete("category");
+    if (categorySlug === "ALL") {
+      params.delete("categories");
+    } else {
+      params.set("categories", categorySlug);
+    }
+    const query = params.toString();
+    return query ? `${basePath}?${query}` : basePath;
+  }
+
+  function isChipActive(categorySlug: string | "ALL"): boolean {
+    if (categorySlug === "ALL") {
+      return resolvedSelectedCategories.length === 0;
+    }
+    if (resolvedSelectedCategories.length === 1) {
+      return resolvedSelectedCategories[0] === categorySlug;
+    }
+    return false;
+  }
+
+  const anyNonRootSelected = resolvedSelectedCategories.some((slug) => {
+    const match = categories.find((c) => c.slug === slug);
+    return match && match.parentId !== null;
+  });
+
   return (
     <section className="space-y-6 lg:space-y-8">
       <RevealOnScroll>
@@ -125,6 +157,59 @@ export function ProductListingSection({
             <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-400 tracking-[0.4px]">
               {description}
             </p>
+          </div>
+        </div>
+      </RevealOnScroll>
+
+      <RevealOnScroll delay={100}>
+        <div className="mhv-card px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <Link
+              href={buildChipHref("ALL")}
+              aria-pressed={isChipActive("ALL")}
+              className={`inline-flex items-center px-4 py-2 text-sm font-normal tracking-[0.4px] border transition-all duration-[500ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:opacity-80 ${
+                isChipActive("ALL")
+                  ? "border-[#F27025] text-[#F27025] bg-[#F27025]/[0.04]"
+                  : "border-[var(--border)] text-[var(--foreground)] bg-[var(--card)]"
+              }`}
+            >
+              Tất cả
+            </Link>
+            {rootCategoryChips.map((chip) => {
+              const active = isChipActive(chip.slug);
+              return (
+                <Link
+                  key={chip.id}
+                  href={buildChipHref(chip.slug)}
+                  aria-pressed={active}
+                  className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-normal tracking-[0.4px] border transition-all duration-[500ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:opacity-80 ${
+                    active
+                      ? "border-[#F27025] text-[#F27025] bg-[#F27025]/[0.04]"
+                      : "border-[var(--border)] text-[var(--foreground)] bg-[var(--card)]"
+                  }`}
+                >
+                  <span>{chip.name}</span>
+                  <span
+                    className={`text-xs tracking-[0.4px] ${
+                      active ? "text-[#F27025]/80" : "text-[var(--muted)]"
+                    }`}
+                  >
+                    {chip.productCount}
+                  </span>
+                </Link>
+              );
+            })}
+            {anyNonRootSelected ? (
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-normal tracking-[0.4px] border border-[#F27025] text-[#F27025] bg-[#F27025]/[0.04]">
+                <span>Nhóm con được chọn</span>
+                <Link
+                  href={buildChipHref("ALL")}
+                  className="ml-1 text-xs tracking-[0.4px] underline decoration-current underline-offset-4 hover:opacity-80 transition-opacity duration-300"
+                >
+                  Bỏ chọn
+                </Link>
+              </span>
+            ) : null}
           </div>
         </div>
       </RevealOnScroll>

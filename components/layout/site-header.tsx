@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { useCart } from "@/components/cart/cart-context";
 import { GlobalSearchClient } from "@/components/layout/global-search-client";
 
 const navItems = [
@@ -91,6 +92,22 @@ function UserIcon() {
   );
 }
 
+function CartIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <path
+        d="M4 6h2.5l2.2 11.3A2 2 0 0 0 10.7 19h7.6a2 2 0 0 0 2-1.7L21.5 9H6.7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="butt"
+        strokeLinejoin="miter"
+      />
+      <circle cx="10" cy="21" r="1.2" fill="currentColor" />
+      <circle cx="18" cy="21" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
 function ChevronLeftIcon({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -124,6 +141,7 @@ export function SiteHeader({
   const [view, setView] = useState<MenuView>("main");
   const [categoriesPhase, setCategoriesPhase] = useState<0 | 1 | 2 | 3>(0);
   const [expandedParents, setExpandedParents] = useState<Set<number>>(new Set());
+  const { totalItems } = useCart();
   const isAdmin = session?.role === "admin";
   const hasSession = Boolean(session);
 
@@ -260,6 +278,22 @@ export function SiteHeader({
             <div className="hidden sm:block">
               <GlobalSearchClient variant="topbar" />
             </div>
+
+            <Link
+              href="/cart"
+              aria-label={`Giỏ hàng, ${totalItems} sản phẩm`}
+              className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center text-[var(--foreground)] transition-all duration-300 ease-in-out hover:opacity-70"
+            >
+              <CartIcon className="h-5 w-5" />
+              {totalItems > 0 ? (
+                <span
+                  className="absolute right-1 top-1 z-10 inline-flex min-w-[20px] h-[20px] items-center justify-center px-1 text-[11px] font-medium text-white shadow-none"
+                  style={{ backgroundColor: "#F27025" }}
+                >
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              ) : null}
+            </Link>
 
             {!hasSession ? (
               <Link
@@ -529,15 +563,6 @@ export function SiteHeader({
                           return (
                             <div key={cat.id} className="flex flex-col">
                               <div className="flex items-stretch">
-                                <Link
-                                  href={`/products?categories=${encodeURIComponent(cat.slug)}`}
-                                  onClick={closeMenu}
-                                  className={`flex-1 px-2 py-3 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
-                                    isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
-                                  }`}
-                                >
-                                  <span className="lv-underline-item">{cat.name}</span>
-                                </Link>
                                 {hasChildren ? (
                                   <button
                                     type="button"
@@ -548,11 +573,14 @@ export function SiteHeader({
                                     }}
                                     aria-expanded={isExpanded}
                                     aria-label={isExpanded ? `Thu gọn ${cat.name}` : `Mở rộng ${cat.name}`}
-                                    className="flex w-11 shrink-0 items-center justify-center text-[var(--foreground)] opacity-70 transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:opacity-100"
+                                    className={`flex flex-1 items-center justify-between px-2 py-3 text-left text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                      isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
+                                    }`}
                                   >
+                                    <span className="lv-underline-item">{cat.name}</span>
                                     <svg
                                       viewBox="0 0 24 24"
-                                      className={`h-4 w-4 transition-transform duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                                      className={`ml-3 h-4 w-4 shrink-0 opacity-70 transition-transform duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
                                         isExpanded ? "rotate-90" : ""
                                       }`}
                                       fill="none"
@@ -567,7 +595,17 @@ export function SiteHeader({
                                       />
                                     </svg>
                                   </button>
-                                ) : null}
+                                ) : (
+                                  <Link
+                                    href={`/products?categories=${encodeURIComponent(cat.slug)}`}
+                                    onClick={closeMenu}
+                                    className={`flex-1 px-2 py-3 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                      isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
+                                    }`}
+                                  >
+                                    <span className="lv-underline-item">{cat.name}</span>
+                                  </Link>
+                                )}
                               </div>
                               {hasChildren ? (
                                 <div
@@ -578,18 +616,108 @@ export function SiteHeader({
                                   <div className="min-h-0">
                                     <div className="flex flex-col border-l border-[var(--border)] ml-2 pl-2 pb-2">
                                       {cat.children.map((child) => {
+                                        const childHasChildren =
+                                          child.children && child.children.length > 0;
+                                        const childExpanded = expandedParents.has(child.id);
                                         const isChildActive = selectedCategorySlugs.has(child.slug);
                                         return (
-                                          <Link
-                                            key={child.id}
-                                            href={`/products?categories=${encodeURIComponent(child.slug)}`}
-                                            onClick={closeMenu}
-                                            className={`px-2 py-2 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
-                                              isChildActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
-                                            }`}
-                                          >
-                                            <span className="lv-underline-item">{child.name}</span>
-                                          </Link>
+                                          <div key={child.id} className="flex flex-col">
+                                            <div className="flex items-stretch">
+                                              {childHasChildren ? (
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    toggleExpand(child.id);
+                                                  }}
+                                                  aria-expanded={childExpanded}
+                                                  aria-label={
+                                                    childExpanded
+                                                      ? `Thu gọn ${child.name}`
+                                                      : `Mở rộng ${child.name}`
+                                                  }
+                                                  className={`flex flex-1 items-center justify-between px-2 py-2 text-left text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                                    isChildActive
+                                                      ? "text-[var(--foreground)]"
+                                                      : "text-[var(--foreground)]"
+                                                  }`}
+                                                >
+                                                  <span className="lv-underline-item">
+                                                    {child.name}
+                                                  </span>
+                                                  <svg
+                                                    viewBox="0 0 24 24"
+                                                    className={`ml-3 h-3.5 w-3.5 shrink-0 opacity-70 transition-transform duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                                                      childExpanded ? "rotate-90" : ""
+                                                    }`}
+                                                    fill="none"
+                                                    aria-hidden="true"
+                                                  >
+                                                    <path
+                                                      d="m9 18 6-6-6-6"
+                                                      stroke="currentColor"
+                                                      strokeWidth="1.6"
+                                                      strokeLinecap="round"
+                                                      strokeLinejoin="round"
+                                                    />
+                                                  </svg>
+                                                </button>
+                                              ) : (
+                                                <Link
+                                                  href={`/products?categories=${encodeURIComponent(
+                                                    child.slug,
+                                                  )}`}
+                                                  onClick={closeMenu}
+                                                  className={`flex-1 px-2 py-2 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                                    isChildActive
+                                                      ? "text-[var(--foreground)]"
+                                                      : "text-[var(--foreground)]"
+                                                  }`}
+                                                >
+                                                  <span className="lv-underline-item">
+                                                    {child.name}
+                                                  </span>
+                                                </Link>
+                                              )}
+                                            </div>
+                                            {childHasChildren ? (
+                                              <div
+                                                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-[900ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                                                  childExpanded
+                                                    ? "grid-rows-[1fr] opacity-100"
+                                                    : "grid-rows-[0fr] opacity-0"
+                                                }`}
+                                              >
+                                                <div className="min-h-0">
+                                                  <div className="flex flex-col border-l border-[var(--border)] ml-3 pl-2 pb-1">
+                                                    {child.children.map((grandChild) => {
+                                                      const isGrandActive =
+                                                        selectedCategorySlugs.has(grandChild.slug);
+                                                      return (
+                                                        <Link
+                                                          key={grandChild.id}
+                                                          href={`/products?categories=${encodeURIComponent(
+                                                            grandChild.slug,
+                                                          )}`}
+                                                          onClick={closeMenu}
+                                                          className={`px-2 py-1.5 text-xs font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                                            isGrandActive
+                                                              ? "text-[var(--foreground)]"
+                                                              : "text-[var(--foreground)]"
+                                                          }`}
+                                                        >
+                                                          <span className="lv-underline-item">
+                                                            {grandChild.name}
+                                                          </span>
+                                                        </Link>
+                                                      );
+                                                    })}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ) : null}
+                                          </div>
                                         );
                                       })}
                                     </div>

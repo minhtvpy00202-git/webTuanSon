@@ -13,6 +13,8 @@ import { getPrimaryUnitPrice } from "@/lib/product-pricing";
 type CategoryOption = {
   id: number;
   name: string;
+  parentId: number | null;
+  sortOrder: number;
   units: Array<{
     id: number;
     label: string;

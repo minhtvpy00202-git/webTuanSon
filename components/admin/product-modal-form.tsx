@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ConfirmModal } from "@/components/admin/confirm-modal";
 
@@ -42,6 +42,8 @@ async function deleteImagesViaServer(paths: string[]): Promise<void> {
 type CategoryOption = {
   id: number;
   name: string;
+  parentId: number | null;
+  sortOrder: number;
   units: Array<{
     id: number;
     label: string;
@@ -187,6 +189,11 @@ export function ProductModalForm({
   const [isAddingUnit, setIsAddingUnit] = useState(false);
   const [newUnitLabel, setNewUnitLabel] = useState("");
 
+  const [isCatOpen, setIsCatOpen] = useState(false);
+  const [expandedCatIds, setExpandedCatIds] = useState<Set<number>>(new Set());
+  const [catSearch, setCatSearch] = useState("");
+  const catDropdownRef = useRef<HTMLDivElement | null>(null);
+
   const isEditMode = Boolean(product);
   const hasCategories = categories.length > 0;
   const selectedCategory = useMemo(
@@ -195,6 +202,97 @@ export function ProductModalForm({
     [categories, formData.categoryId],
   );
   const hasUnits = Boolean(selectedCategory?.units.length);
+
+  type FlatTree = CategoryOption & { level: number; hasChildren: boolean };
+
+  const { flatRows, hasChildrenMap } = useMemo(() => {
+    const byParent = new Map<number | null, CategoryOption[]>();
+    for (const c of categories) {
+      const k = c.parentId ?? null;
+      if (!byParent.has(k)) byParent.set(k, []);
+      byParent.get(k)!.push(c);
+    }
+    for (const list of byParent.values()) {
+      list.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
+    }
+    const hasChildrenMapLocal = new Map<number, boolean>();
+    for (const c of categories) {
+      hasChildrenMapLocal.set(c.id, (byParent.get(c.id)?.length ?? 0) > 0);
+    }
+    const rows: FlatTree[] = [];
+    function walk(parentId: number | null, level: number) {
+      const list = byParent.get(parentId) ?? [];
+      for (const item of list) {
+        rows.push({
+          ...item,
+          level,
+          hasChildren: hasChildrenMapLocal.get(item.id) ?? false,
+        });
+      }
+      for (const item of list) {
+        walk(item.id, level + 1);
+      }
+    }
+    walk(null, 0);
+    return { flatRows: rows, hasChildrenMap: hasChildrenMapLocal };
+  }, [categories]);
+
+  const visibleRows = useMemo(() => {
+    const keyword = catSearch.trim().toLowerCase();
+    if (!keyword) {
+      const expandedSet = expandedCatIds;
+      return flatRows.filter((r) => {
+        if (r.level === 0) return true;
+        let ancestor: CategoryOption | undefined = r;
+        let show = true;
+        for (let i = 0; i < r.level; i += 1) {
+          ancestor = categories.find((c) => c.id === (ancestor?.parentId ?? -1));
+          if (!ancestor) {
+            show = false;
+            break;
+          }
+          if (!expandedSet.has(ancestor.id)) {
+            show = false;
+            break;
+          }
+        }
+        return show;
+      });
+    }
+    function descendantsMatch(cat: CategoryOption): boolean {
+      if (
+        cat.name.toLowerCase().includes(keyword) ||
+        String(cat.id).includes(keyword)
+      ) {
+        return true;
+      }
+      const childs = flatRows.filter((r) => r.parentId === cat.id);
+      return childs.some(descendantsMatch);
+    }
+    return flatRows.filter((r) => descendantsMatch(r));
+  }, [flatRows, expandedCatIds, catSearch, categories]);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!catDropdownRef.current) return;
+      if (!(e.target instanceof Node)) return;
+      if (!catDropdownRef.current.contains(e.target)) {
+        setIsCatOpen(false);
+        setCatSearch("");
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  function toggleCatExpand(id: number) {
+    setExpandedCatIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function updateField<K extends keyof ProductFormState>(
     key: K,
@@ -212,6 +310,8 @@ export function ProductModalForm({
       categoryId: nextCategoryId,
       unitPrices: buildUnitPriceFields(categories, nextCategoryId, current.unitPrices),
     }));
+    setIsCatOpen(false);
+    setCatSearch("");
   }
 
   function updateUnitPrice(
@@ -538,19 +638,138 @@ export function ProductModalForm({
           <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
             Loại sản phẩm
           </span>
-          <select
-            value={formData.categoryId}
-            onChange={(event) => handleCategoryChange(event.target.value)}
-            className="mhv-input text-sm tracking-[0.4px]"
-            required
+          <div
+            ref={catDropdownRef}
+            className="relative"
           >
-            <option value="">Chọn loại sản phẩm</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
+            <input
+              type="hidden"
+              name="categoryId"
+              value={formData.categoryId}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setIsCatOpen((v) => !v)}
+              aria-haspopup="listbox"
+              aria-expanded={isCatOpen}
+              className="mhv-input flex w-full items-center justify-between gap-3 text-left text-sm tracking-[0.4px] focus:border-[var(--foreground)]"
+            >
+              <span className={selectedCategory ? "text-[var(--foreground)]" : "text-slate-400"}>
+                {selectedCategory?.name ?? "Chọn loại sản phẩm"}
+              </span>
+              <svg
+                viewBox="0 0 24 24"
+                className={`h-4 w-4 shrink-0 text-[var(--muted)] transition-transform duration-300 ${
+                  isCatOpen ? "rotate-180" : ""
+                }`}
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="m6 9 6 6 6-6"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {isCatOpen ? (
+              <div className="absolute left-0 right-0 top-full z-50 mt-2 border border-[var(--border)] bg-white shadow-lg">
+                <div className="border-b border-[var(--border)] p-2">
+                  <input
+                    type="text"
+                    value={catSearch}
+                    autoFocus
+                    onChange={(e) => setCatSearch(e.target.value)}
+                    placeholder="Tìm tên loại..."
+                    className="w-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-normal tracking-[0.4px] text-[var(--foreground)] outline-none transition-all duration-300 placeholder:text-[var(--muted)] focus:border-[var(--foreground)]"
+                  />
+                </div>
+                <ul
+                  role="listbox"
+                  className="max-h-72 overflow-y-auto py-1"
+                >
+                  {visibleRows.length === 0 ? (
+                    <li className="px-4 py-3 text-sm font-normal tracking-[0.4px] text-[var(--muted)]">
+                      Không có loại nào phù hợp.
+                    </li>
+                  ) : null}
+                  {visibleRows.map((row) => {
+                    const isSelected = String(row.id) === formData.categoryId;
+                    const isExpanded = expandedCatIds.has(row.id);
+                    return (
+                      <li
+                        key={row.id}
+                        role="option"
+                        aria-selected={isSelected}
+                      >
+                        <div
+                          className={`flex items-center transition-colors duration-200 ${
+                            isSelected
+                              ? "bg-[var(--surface-muted)]"
+                              : "hover:bg-[var(--surface-muted)]"
+                          }`}
+                          style={{ paddingLeft: `${8 + row.level * 20}px` }}
+                        >
+                          {row.hasChildren ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCatExpand(row.id);
+                              }}
+                              aria-expanded={isExpanded}
+                              aria-label={
+                                isExpanded
+                                  ? `Thu gọn ${row.name}`
+                                  : `Mở rộng ${row.name}`
+                              }
+                              className="flex h-6 w-6 shrink-0 items-center justify-center border border-[var(--border)] bg-white text-[var(--foreground)] transition-all duration-200 hover:bg-[var(--surface-muted)] hover:opacity-80"
+                            >
+                              <span className="text-sm leading-none font-normal">
+                                {isExpanded ? "−" : "+"}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="h-6 w-6 shrink-0" />
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleCategoryChange(String(row.id))}
+                            className={`flex flex-1 items-center justify-between gap-2 py-2 pr-3 text-left text-sm tracking-[0.4px] ${
+                              isSelected
+                                ? "font-medium text-[var(--foreground)]"
+                                : "font-normal text-[var(--foreground)]"
+                            }`}
+                          >
+                            <span className="truncate">{row.name}</span>
+                            {isSelected ? (
+                              <svg
+                                viewBox="0 0 24 24"
+                                className="h-4 w-4 shrink-0 text-[var(--foreground)]"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M4 12.5 10 18l10-11"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            ) : null}
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         </label>
       </div>
 

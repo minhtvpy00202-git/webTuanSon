@@ -90,13 +90,15 @@ export function AdminLoginForm() {
         autoComplete="current-password"
       />
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="mhv-btn-primary inline-flex px-5 py-3 text-sm font-normal transition-all duration-200 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70 tracking-[0.4px]"
-      >
-        {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
-      </button>
+      <div className="pt-2 flex justify-end">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="mhv-btn-primary inline-flex px-8 py-3 text-sm font-normal transition-all duration-200 ease-in-out hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-70 tracking-[0.4px] min-w-[180px] justify-center"
+        >
+          {isSubmitting ? "Đang đăng nhập..." : "Đăng nhập"}
+        </button>
+      </div>
     </form>
   );
 }
