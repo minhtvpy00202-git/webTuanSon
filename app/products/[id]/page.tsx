@@ -27,6 +27,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
     include: {
       category: {
         include: {
+          parent: { select: { id: true, name: true, slug: true } },
           units: {
             orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
           },
@@ -80,6 +81,17 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         >
           Sản phẩm
         </Link>
+        {product.category.parent ? (
+          <>
+            <span>/</span>
+            <Link
+              href={`/products?categories=${encodeURIComponent(product.category.parent.slug)}`}
+              className="transition-all duration-200 ease-in-out hover:opacity-70 tracking-[0.4px]"
+            >
+              {product.category.parent.name}
+            </Link>
+          </>
+        ) : null}
         <span>/</span>
         <span className="tracking-[0.4px]">{product.category.name}</span>
       </div>
@@ -125,7 +137,11 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
             <div className="border border-slate-200 p-4 dark:border-slate-700">
               <p className="text-sm font-normal text-slate-900 dark:text-slate-100 tracking-[0.4px]">Danh mục</p>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">{product.category.name}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400 tracking-[0.4px]">
+                {product.category.parent
+                  ? `${product.category.parent.name} › ${product.category.name}`
+                  : product.category.name}
+              </p>
             </div>
           </div>
 

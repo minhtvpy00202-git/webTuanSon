@@ -13,6 +13,7 @@ type ListingCategory = {
   name: string;
   slug: string;
   productCount: number;
+  parentId: number | null;
 };
 
 type ListingProduct = {

@@ -15,7 +15,7 @@ const navItems = [
   { href: "/contact", label: "Liên hệ" },
 ];
 
-type CategoryNavItem = { id: number; name: string; slug: string };
+type CategoryNavItem = { id: number; name: string; slug: string; children: CategoryNavItem[] };
 type FeaturedCategoryProduct = {
   categoryId: number;
   categoryName: string;
@@ -123,8 +123,21 @@ export function SiteHeader({
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [view, setView] = useState<MenuView>("main");
   const [categoriesPhase, setCategoriesPhase] = useState<0 | 1 | 2 | 3>(0);
+  const [expandedParents, setExpandedParents] = useState<Set<number>>(new Set());
   const isAdmin = session?.role === "admin";
   const hasSession = Boolean(session);
+
+  function toggleExpand(id: number) {
+    setExpandedParents((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (view !== "categories") {
@@ -510,18 +523,80 @@ export function SiteHeader({
                           </div>
                         ) : null}
                         {categories.map((cat) => {
+                          const hasChildren = cat.children && cat.children.length > 0;
+                          const isExpanded = expandedParents.has(cat.id);
                           const isCatActive = selectedCategorySlugs.has(cat.slug);
                           return (
-                            <Link
-                              key={cat.id}
-                              href={`/products?categories=${encodeURIComponent(cat.slug)}`}
-                              onClick={closeMenu}
-                              className={`px-2 py-3 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
-                                isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
-                              }`}
-                            >
-                              <span className="lv-underline-item">{cat.name}</span>
-                            </Link>
+                            <div key={cat.id} className="flex flex-col">
+                              <div className="flex items-stretch">
+                                <Link
+                                  href={`/products?categories=${encodeURIComponent(cat.slug)}`}
+                                  onClick={closeMenu}
+                                  className={`flex-1 px-2 py-3 text-base font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                    isCatActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
+                                  }`}
+                                >
+                                  <span className="lv-underline-item">{cat.name}</span>
+                                </Link>
+                                {hasChildren ? (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      toggleExpand(cat.id);
+                                    }}
+                                    aria-expanded={isExpanded}
+                                    aria-label={isExpanded ? `Thu gọn ${cat.name}` : `Mở rộng ${cat.name}`}
+                                    className="flex w-11 shrink-0 items-center justify-center text-[var(--foreground)] opacity-70 transition-all duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] hover:opacity-100"
+                                  >
+                                    <svg
+                                      viewBox="0 0 24 24"
+                                      className={`h-4 w-4 transition-transform duration-[850ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                                        isExpanded ? "rotate-90" : ""
+                                      }`}
+                                      fill="none"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        d="m9 18 6-6-6-6"
+                                        stroke="currentColor"
+                                        strokeWidth="1.6"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+                                  </button>
+                                ) : null}
+                              </div>
+                              {hasChildren ? (
+                                <div
+                                  className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-[900ms] ease-[cubic-bezier(.22,.61,.36,1)] ${
+                                    isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                                  }`}
+                                >
+                                  <div className="min-h-0">
+                                    <div className="flex flex-col border-l border-[var(--border)] ml-2 pl-2 pb-2">
+                                      {cat.children.map((child) => {
+                                        const isChildActive = selectedCategorySlugs.has(child.slug);
+                                        return (
+                                          <Link
+                                            key={child.id}
+                                            href={`/products?categories=${encodeURIComponent(child.slug)}`}
+                                            onClick={closeMenu}
+                                            className={`px-2 py-2 text-sm font-normal tracking-[0.4px] transition-all duration-300 ease-in-out hover:opacity-70 ${
+                                              isChildActive ? "text-[var(--foreground)]" : "text-[var(--foreground)]"
+                                            }`}
+                                          >
+                                            <span className="lv-underline-item">{child.name}</span>
+                                          </Link>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : null}
+                            </div>
                           );
                         })}
                       </div>

@@ -10,6 +10,8 @@ type CategoryPayload = {
   slug?: string;
   units?: string[];
   defaultUnit?: string;
+  parentId?: number | string | null;
+  sortOrder?: number | string;
 };
 
 export async function POST(request: Request) {
@@ -30,6 +32,16 @@ export async function POST(request: Request) {
   const slug = slugify(body?.slug?.trim() || name);
   const units = parseUnitLabels(Array.isArray(body?.units) ? body!.units.join("\n") : "");
   const defaultUnit = body?.defaultUnit?.trim() || units[0] || "";
+  const parentIdRaw = body?.parentId;
+  const parentId =
+    parentIdRaw === null || parentIdRaw === undefined || parentIdRaw === ""
+      ? null
+      : Number(parentIdRaw);
+  const sortOrderRaw = body?.sortOrder;
+  const sortOrder =
+    sortOrderRaw === undefined || sortOrderRaw === null || sortOrderRaw === ""
+      ? 0
+      : Number(sortOrderRaw);
 
   if (name.length < 2) {
     return NextResponse.json(
@@ -71,11 +83,49 @@ export async function POST(request: Request) {
     );
   }
 
+  if (parentId !== null && (!Number.isFinite(parentId) || parentId <= 0)) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Nhóm sản phẩm cha không hợp lệ.",
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!Number.isFinite(sortOrder)) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Thứ tự sắp xếp không hợp lệ.",
+      },
+      { status: 400 },
+    );
+  }
+
   try {
+    if (parentId !== null) {
+      const parentExists = await prisma.category.findUnique({
+        where: { id: parentId },
+        select: { id: true },
+      });
+      if (!parentExists) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Nhóm sản phẩm cha không tồn tại.",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
     const category = await prisma.category.create({
       data: {
         name,
         slug,
+        parentId,
+        sortOrder,
         units: {
           create: units.map((unit, index) => ({
             label: unit,
@@ -88,6 +138,7 @@ export async function POST(request: Request) {
         units: {
           orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
         },
+        parent: { select: { id: true, name: true, slug: true } },
       },
     });
 

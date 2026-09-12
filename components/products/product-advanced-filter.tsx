@@ -8,7 +8,34 @@ type FilterCategory = {
   name: string;
   slug: string;
   productCount: number;
+  parentId: number | null;
 };
+
+type FilterCategoryNode = {
+  id: number;
+  name: string;
+  slug: string;
+  productCount: number;
+  parentId: number | null;
+  children: FilterCategoryNode[];
+};
+
+function buildFilterTree(cats: FilterCategory[]): FilterCategoryNode[] {
+  const byId = new Map<number, FilterCategoryNode>();
+  const roots: FilterCategoryNode[] = [];
+  for (const c of cats) {
+    byId.set(c.id, { ...c, children: [] });
+  }
+  for (const c of cats) {
+    const node = byId.get(c.id)!;
+    if (c.parentId !== null && byId.has(c.parentId)) {
+      byId.get(c.parentId)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
 
 type ProductAdvancedFilterProps = {
   categories: FilterCategory[];
@@ -56,6 +83,8 @@ export function ProductAdvancedFilter({
       internalOpenState[1](next);
     }
   };
+
+  const categoryTree = buildFilterTree(categories);
 
   function toggleCategory(slug: string) {
     setCats((prev) =>
@@ -119,39 +148,53 @@ export function ProductAdvancedFilter({
         <label className="block text-sm font-normal text-[var(--foreground)] tracking-[0.4px]">
           Nhóm vật liệu
         </label>
-        <div className="max-h-64 space-y-2 overflow-y-auto pr-2">
-          {categories.map((category) => {
-            const checked = cats.includes(category.slug);
-            return (
-              <label
-                key={category.id}
-                className={`flex cursor-pointer items-start gap-3 border px-4 py-3 text-sm font-normal tracking-[0.4px] transition-opacity duration-200 hover:opacity-70 ${
-                  checked
-                    ? "lv-solid-primary"
-                    : "border-[var(--border)] bg-transparent"
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  className="mhv-checkbox mt-0.5 h-4 w-4 shrink-0"
-                  checked={checked}
-                  onChange={() => toggleCategory(category.slug)}
-                />
-                <span className="flex flex-1 items-center justify-between gap-2">
-                  <span className={checked ? "" : "text-[var(--foreground)]"}>
-                    {category.name}
-                  </span>
-                  <span
-                    className={`text-xs tracking-[0.4px] ${
-                      checked ? "opacity-80" : "opacity-70"
+        <div className="max-h-64 space-y-1 overflow-y-auto pr-2">
+          {(function renderTree(
+            nodes: FilterCategoryNode[],
+            level: number,
+          ): React.ReactNode {
+            return nodes.map((category) => {
+              const checked = cats.includes(category.slug);
+              const indent = level * 16;
+              return (
+                <div key={category.id}>
+                  <label
+                    className={`flex cursor-pointer items-start gap-3 border px-4 py-3 text-sm font-normal tracking-[0.4px] transition-opacity duration-200 hover:opacity-70 ${
+                      checked
+                        ? "lv-solid-primary"
+                        : "border-[var(--border)] bg-transparent"
                     }`}
+                    style={{ marginLeft: indent }}
                   >
-                    ({category.productCount})
-                  </span>
-                </span>
-              </label>
-            );
-          })}
+                    <input
+                      type="checkbox"
+                      className="mhv-checkbox mt-0.5 h-4 w-4 shrink-0"
+                      checked={checked}
+                      onChange={() => toggleCategory(category.slug)}
+                    />
+                    <span className="flex flex-1 items-center justify-between gap-2">
+                      <span className={checked ? "" : "text-[var(--foreground)]"}>
+                        {level > 0 ? (
+                          <span className="opacity-50 mr-1.5">└</span>
+                        ) : null}
+                        {category.name}
+                      </span>
+                      <span
+                        className={`text-xs tracking-[0.4px] ${
+                          checked ? "opacity-80" : "opacity-70"
+                        }`}
+                      >
+                        ({category.productCount})
+                      </span>
+                    </span>
+                  </label>
+                  {category.children && category.children.length > 0
+                    ? renderTree(category.children, level + 1)
+                    : null}
+                </div>
+              );
+            });
+          })(categoryTree, 0)}
         </div>
       </div>
 

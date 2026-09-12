@@ -11,6 +11,9 @@ type CategoryRow = {
   id: number;
   name: string;
   slug: string;
+  parentId: number | null;
+  parentName?: string;
+  sortOrder: number;
   units: Array<{
     id: number;
     label: string;
@@ -19,8 +22,16 @@ type CategoryRow = {
   productCount: number;
 };
 
+type ParentOption = {
+  id: number;
+  name: string;
+  slug: string;
+  parentId: number | null;
+};
+
 type CategoryManagementProps = {
   categories: CategoryRow[];
+  parentOptions?: ParentOption[];
 };
 
 function PencilIcon() {
@@ -51,7 +62,10 @@ function TrashIcon() {
   );
 }
 
-export function CategoryManagement({ categories }: CategoryManagementProps) {
+export function CategoryManagement({
+  categories,
+  parentOptions = [],
+}: CategoryManagementProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -148,6 +162,8 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
               <tr>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Tên loại</th>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Slug</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Nhóm cha</th>
+                <th className="px-6 py-4 font-normal tracking-[0.4px]">Thứ tự</th>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Đơn vị tính</th>
                 <th className="px-6 py-4 font-normal tracking-[0.4px]">Số sản phẩm</th>
                 <th className="px-6 py-4 font-normal text-right tracking-[0.4px]">Thao tác</th>
@@ -165,6 +181,16 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
                     </td>
                     <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
                       {category.slug}
+                    </td>
+                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                      {category.parentName ?? (
+                        <span className="inline-flex px-3 py-1 text-xs font-normal tracking-[0.4px] border border-[var(--border)] bg-[var(--surface-muted)] text-[var(--foreground)]">
+                          Nhóm gốc
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
+                      {category.sortOrder}
                     </td>
                     <td className="px-6 py-4 text-[var(--muted)] tracking-[0.4px]">
                       <div className="flex flex-wrap gap-2">
@@ -215,7 +241,7 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
               ) : (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={7}
                     className="px-6 py-10 text-center text-sm font-normal text-[var(--muted)] tracking-[0.4px]"
                   >
                     Không tìm thấy loại sản phẩm phù hợp.
@@ -234,7 +260,10 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
         onClose={() => setIsCreateOpen(false)}
         maxWidthClassName="max-w-xl"
       >
-        <CategoryModalForm onSuccess={() => setIsCreateOpen(false)} />
+        <CategoryModalForm
+          parentOptions={parentOptions}
+          onSuccess={() => setIsCreateOpen(false)}
+        />
       </AdminModal>
 
       <AdminModal
@@ -247,6 +276,7 @@ export function CategoryManagement({ categories }: CategoryManagementProps) {
         {editingCategory ? (
           <CategoryModalForm
             category={editingCategory}
+            parentOptions={parentOptions}
             onSuccess={() => setEditingCategory(null)}
           />
         ) : null}

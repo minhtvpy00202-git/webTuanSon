@@ -1,26 +1,67 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { parseUnitLabels } from "@/lib/product-pricing";
+
+type ParentOption = {
+  id: number;
+  name: string;
+  slug: string;
+  parentId: number | null;
+};
 
 type CategoryModalFormProps = {
   category?: {
     id: number;
     name: string;
     slug: string;
+    parentId?: number | null;
+    sortOrder?: number;
     units: Array<{
       id: number;
       label: string;
       isDefault: boolean;
     }>;
   };
+  parentOptions?: ParentOption[];
   onSuccess: () => void;
 };
 
+type OptionTree = {
+  id: number;
+  name: string;
+  level: number;
+};
+
+function buildOptions(
+  list: ParentOption[],
+  excludeId?: number,
+): OptionTree[] {
+  const byParent = new Map<number | null, ParentOption[]>();
+  for (const c of list) {
+    if (c.id === excludeId) continue;
+    const key = c.parentId ?? null;
+    if (!byParent.has(key)) byParent.set(key, []);
+    byParent.get(key)!.push(c);
+  }
+  const result: OptionTree[] = [];
+  const queue: Array<{ id: number | null; level: number }> = [{ id: null, level: 0 }];
+  while (queue.length) {
+    const current = queue.shift()!;
+    const children = byParent.get(current.id) ?? [];
+    for (const c of children) {
+      result.push({ id: c.id, name: c.name, level: current.level });
+      queue.unshift({ id: c.id, level: current.level + 1 });
+    }
+  }
+  return result;
+}
+
 export function CategoryModalForm({
   category,
+  parentOptions = [],
   onSuccess,
 }: CategoryModalFormProps) {
   const router = useRouter();
@@ -32,11 +73,24 @@ export function CategoryModalForm({
   const [defaultUnit, setDefaultUnit] = useState(
     category?.units.find((unit) => unit.isDefault)?.label ?? category?.units[0]?.label ?? "cái",
   );
+  const [parentId, setParentId] = useState<string>(
+    category?.parentId === undefined || category?.parentId === null
+      ? ""
+      : String(category.parentId),
+  );
+  const [sortOrder, setSortOrder] = useState<string>(
+    category?.sortOrder === undefined ? "0" : String(category.sortOrder),
+  );
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditMode = Boolean(category);
   const parsedUnits = parseUnitLabels(unitsText);
+
+  const flatOptions = useMemo(
+    () => buildOptions(parentOptions, category?.id),
+    [parentOptions, category?.id],
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,6 +121,8 @@ export function CategoryModalForm({
             slug,
             units: parsedUnits,
             defaultUnit: defaultUnit.trim(),
+            parentId: parentId === "" ? null : Number(parentId),
+            sortOrder: Number(sortOrder),
           }),
         },
       );
@@ -125,6 +181,48 @@ export function CategoryModalForm({
           placeholder="Ví dụ: gach-op-lat"
         />
       </label>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="space-y-2">
+          <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
+            Nhóm cha
+          </span>
+          <select
+            value={parentId}
+            onChange={(event) => setParentId(event.target.value)}
+            className="mhv-input text-sm tracking-[0.4px]"
+          >
+            <option value="">Không có (là nhóm gốc)</option>
+            {flatOptions.map((opt) => (
+              <option key={opt.id} value={String(opt.id)}>
+                {`${"  ".repeat(opt.level)}${opt.level > 0 ? "└ " : ""}${opt.name}`}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs font-normal leading-5 tracking-[0.4px] text-[var(--muted)]">
+            Đặt nhóm cha để tạo cấu trúc nhiều cấp. Ví dụ: Nhóm "Gạch" chứa "Gạch
+            30x30", "Gạch 60x60".
+          </p>
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">
+            Thứ tự sắp xếp
+          </span>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={sortOrder}
+            onChange={(event) => setSortOrder(event.target.value)}
+            className="mhv-input text-sm tracking-[0.4px]"
+            placeholder="0"
+          />
+          <p className="text-xs font-normal leading-5 tracking-[0.4px] text-[var(--muted)]">
+            Số nhỏ hơn xuất hiện trước. Mặc định là 0.
+          </p>
+        </label>
+      </div>
 
       <label className="space-y-2">
         <span className="text-sm font-normal tracking-[0.4px] text-[var(--foreground)]">

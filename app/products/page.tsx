@@ -2,6 +2,14 @@ import { ProductListingSection } from "@/components/products/product-listing-sec
 import { getPrimaryUnitPrice, resolveUnitPrices } from "@/lib/product-pricing";
 import { prisma } from "@/lib/prisma";
 
+type ListingCategoryFlat = {
+  id: number;
+  name: string;
+  slug: string;
+  parentId: number | null;
+  productCount: number;
+};
+
 type ProductsPageProps = {
   searchParams?: Promise<{
     category?: string;
@@ -13,6 +21,28 @@ type ProductsPageProps = {
     maxPrice?: string;
   }>;
 };
+
+function expandSlugsToIds(
+  selectedSlugs: string[],
+  flat: ListingCategoryFlat[],
+): number[] {
+  const slugToCat = new Map(flat.map((c) => [c.slug, c]));
+  const resultIds = new Set<number>();
+  const queue: number[] = [];
+  for (const slug of selectedSlugs) {
+    const cat = slugToCat.get(slug);
+    if (cat) queue.push(cat.id);
+  }
+  while (queue.length) {
+    const id = queue.shift()!;
+    if (resultIds.has(id)) continue;
+    resultIds.add(id);
+    for (const c of flat) {
+      if (c.parentId === id) queue.push(c.id);
+    }
+  }
+  return Array.from(resultIds);
+}
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
@@ -51,13 +81,34 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     (minPriceNum !== null && !Number.isNaN(minPriceNum)) ||
     (maxPriceNum !== null && !Number.isNaN(maxPriceNum));
 
+  const flatCategoriesPromise = prisma.category.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }, { id: "asc" }],
+    include: {
+      units: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+      },
+      _count: {
+        select: {
+          products: true,
+        },
+      },
+    },
+  });
+
+  const flatCategories = await flatCategoriesPromise;
+  const rawCategories: ListingCategoryFlat[] = flatCategories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    parentId: c.parentId,
+    productCount: c._count.products,
+  }));
+
+  const selectedCategoryIds = expandSlugsToIds(selectedCategories, rawCategories);
+
   const whereClause = {
-    ...(selectedCategories.length > 0
-      ? {
-          category: {
-            slug: { in: selectedCategories },
-          },
-        }
+    ...(selectedCategoryIds.length > 0
+      ? { categoryId: { in: selectedCategoryIds } }
       : {}),
     ...(promotionFilter === "promotion"
       ? { isPromotion: true }
@@ -111,53 +162,39 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       : {}),
   };
 
-  const [categories, products] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        units: {
-          orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-        },
-        _count: {
-          select: {
-            products: true,
+  const products = await prisma.product.findMany({
+    where: whereClause,
+    include: {
+      category: {
+        include: {
+          parent: { select: { id: true, name: true, slug: true } },
+          units: {
+            orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
           },
         },
       },
-    }),
-    prisma.product.findMany({
-      where: whereClause,
-      include: {
-        category: {
-          include: {
-            units: {
-              orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-            },
-          },
+      unitPrices: {
+        include: {
+          categoryUnit: true,
         },
-        unitPrices: {
-          include: {
-            categoryUnit: true,
-          },
-          orderBy: {
-            categoryUnit: {
-              sortOrder: "asc",
-            },
+        orderBy: {
+          categoryUnit: {
+            sortOrder: "asc",
           },
         },
       },
-      orderBy:
-        sortOption === "price-asc"
-          ? { price: "asc" }
-          : sortOption === "price-desc"
-            ? { price: "desc" }
-            : { createdAt: "desc" },
-    }),
-  ]);
+    },
+    orderBy:
+      sortOption === "price-asc"
+        ? { price: "asc" }
+        : sortOption === "price-desc"
+          ? { price: "desc" }
+          : { createdAt: "desc" },
+  });
 
   const selectedCategoryName =
     selectedCategories.length === 1
-      ? categories.find((category) => category.slug === selectedCategories[0])?.name
+      ? rawCategories.find((category) => category.slug === selectedCategories[0])?.name
       : selectedCategories.length > 1
         ? `${selectedCategories.length} nhóm`
         : undefined;
@@ -167,11 +204,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       badge="Vật liệu xây dựng"
       title="Sản phẩm xây dựng"
       description="Gạch ốp lát, ngói và thiết bị vệ sinh chính hãng."
-      categories={categories.map((category) => ({
+      categories={rawCategories.map((category) => ({
         id: category.id,
         name: category.name,
         slug: category.slug,
-        productCount: category._count.products,
+        productCount: category.productCount,
+        parentId: category.parentId,
       }))}
       selectedCategory={selectedCategories.length === 1 ? selectedCategories[0] : undefined}
       selectedCategories={selectedCategories}
@@ -212,6 +250,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           isPromotion: product.isPromotion,
           category: {
             name: product.category.name,
+            parentName: product.category.parent?.name ?? undefined,
+            parentSlug: product.category.parent?.slug ?? undefined,
           },
         };
       })}

@@ -10,6 +10,8 @@ type CategoryPayload = {
   slug?: string;
   units?: string[];
   defaultUnit?: string;
+  parentId?: number | string | null;
+  sortOrder?: number | string;
 };
 
 type RouteContext = {
@@ -45,6 +47,16 @@ export async function PATCH(request: Request, context: RouteContext) {
   const slug = slugify(body?.slug?.trim() || name);
   const units = parseUnitLabels(Array.isArray(body?.units) ? body!.units.join("\n") : "");
   const defaultUnit = body?.defaultUnit?.trim() || units[0] || "";
+  const parentIdRaw = body?.parentId;
+  const parentId =
+    parentIdRaw === null || parentIdRaw === undefined || parentIdRaw === ""
+      ? null
+      : Number(parentIdRaw);
+  const sortOrderRaw = body?.sortOrder;
+  const sortOrder =
+    sortOrderRaw === undefined || sortOrderRaw === null || sortOrderRaw === ""
+      ? undefined
+      : Number(sortOrderRaw);
 
   if (!Number.isFinite(categoryId)) {
     return NextResponse.json(
@@ -74,7 +86,41 @@ export async function PATCH(request: Request, context: RouteContext) {
     );
   }
 
+  if (parentId !== null && (!Number.isFinite(parentId) || parentId <= 0)) {
+    return NextResponse.json(
+      { success: false, message: "Nhóm sản phẩm cha không hợp lệ." },
+      { status: 400 },
+    );
+  }
+
+  if (sortOrder !== undefined && !Number.isFinite(sortOrder)) {
+    return NextResponse.json(
+      { success: false, message: "Thứ tự sắp xếp không hợp lệ." },
+      { status: 400 },
+    );
+  }
+
   try {
+    if (parentId === categoryId) {
+      return NextResponse.json(
+        { success: false, message: "Không thể đặt nhóm sản phẩm làm cha của chính nó." },
+        { status: 400 },
+      );
+    }
+
+    if (parentId !== null) {
+      const parentExists = await prisma.category.findUnique({
+        where: { id: parentId },
+        select: { id: true },
+      });
+      if (!parentExists) {
+        return NextResponse.json(
+          { success: false, message: "Nhóm sản phẩm cha không tồn tại." },
+          { status: 400 },
+        );
+      }
+    }
+
     const category = await prisma.$transaction(async (tx) => {
       const existingCategory = await tx.category.findUnique({
         where: { id: categoryId },
@@ -128,13 +174,29 @@ export async function PATCH(request: Request, context: RouteContext) {
         });
       }
 
+      const updateData: {
+        name: string;
+        slug: string;
+        parentId?: number | null;
+        sortOrder?: number;
+      } = { name, slug };
+
+      if (parentIdRaw !== undefined) {
+        updateData.parentId = parentId;
+      }
+
+      if (sortOrder !== undefined) {
+        updateData.sortOrder = sortOrder;
+      }
+
       return tx.category.update({
         where: { id: categoryId },
-        data: { name, slug },
+        data: updateData,
         include: {
           units: {
             orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
           },
+          parent: { select: { id: true, name: true, slug: true } },
         },
       });
     });

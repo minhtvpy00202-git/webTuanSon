@@ -34,46 +34,82 @@ type FeaturedCategoryProduct = {
     productImageUrl: string | null;
   };
 
+type CategoryNavTreeItem = {
+  id: number;
+  name: string;
+  slug: string;
+  children: CategoryNavTreeItem[];
+};
+
+function buildCategoryTree(
+  flat: Array<{ id: number; name: string; slug: string; parentId: number | null }>,
+): CategoryNavTreeItem[] {
+  const byId = new Map<number, CategoryNavTreeItem>();
+  const roots: CategoryNavTreeItem[] = [];
+  for (const cat of flat) {
+    byId.set(cat.id, { id: cat.id, name: cat.name, slug: cat.slug, children: [] });
+  }
+  for (const cat of flat) {
+    const node = byId.get(cat.id)!;
+    if (cat.parentId !== null && byId.has(cat.parentId)) {
+      byId.get(cat.parentId)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
+
 export default async function RootLayout({ children }: RootLayoutProps) {
   let companyInfo: Awaited<ReturnType<typeof prisma.companyInfo.findUnique>> | null = null;
   let session: Awaited<ReturnType<typeof getAdminSession>> | null = null;
-  let categories: Array<{ id: number; name: string; slug: string }> = [];
+  let categories: CategoryNavTreeItem[] = [];
   let featuredCategoryProducts: FeaturedCategoryProduct[] = [];
 
   try {
-    const [companyInfoResult, sessionResult, categoriesResult] = await Promise.all([
+    const [companyInfoResult, sessionResult, flatCategories] = await Promise.all([
       prisma.companyInfo.findUnique({
         where: { id: 1 },
       }),
       getAdminSession(),
       prisma.category.findMany({
-        select: { id: true, name: true, slug: true },
-        orderBy: [{ name: "asc" }, { id: "asc" }],
+        select: { id: true, name: true, slug: true, parentId: true },
+        orderBy: [{ sortOrder: "asc" }, { name: "asc" }, { id: "asc" }],
       }),
     ]);
     companyInfo = companyInfoResult;
     session = sessionResult;
-    categories = categoriesResult;
+    categories = buildCategoryTree(flatCategories);
 
-    const shuffled = [...categories].sort(() => Math.random() - 0.5);
+    const rootLevel = flatCategories.filter((c) => c.parentId === null);
+    const shuffled = [...rootLevel].sort(() => Math.random() - 0.5);
     const pickedCategories = shuffled.slice(0, Math.min(3, shuffled.length));
+    const pickedIds = new Set(pickedCategories.map((c) => c.id));
+    const childSupplement = flatCategories.filter((c) => c.parentId !== null && pickedIds.has(c.parentId));
+    const pickPool = pickedCategories.length >= 3 ? pickedCategories : [...pickedCategories, ...childSupplement].slice(0, 3);
+
     const allProductsForPicked = await Promise.all(
-      pickedCategories.map((cat) =>
+      pickPool.map((cat) =>
         prisma.product.findMany({
-          where: { categoryId: cat.id },
+          where: {
+            OR: [
+              { categoryId: cat.id },
+              { category: { parent: { id: cat.id } } },
+            ],
+          },
           select: { id: true, name: true, imageUrl: true },
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: 5,
         }),
       ),
     );
-    const featuredRows = pickedCategories.map((cat, idx) => {
+    const featuredRows = pickPool.map((cat, idx) => {
       const list = allProductsForPicked[idx] ?? [];
       const withImage = list.find((p) => Boolean(p.imageUrl));
       return { category: cat, product: withImage ?? list[0] ?? null };
     });
     featuredCategoryProducts = featuredRows
-      .filter((fr): fr is { category: (typeof categories)[number]; product: NonNullable<(typeof featuredRows)[number]["product"]> } => Boolean(fr.product))
+      .filter((fr): fr is { category: (typeof flatCategories)[number]; product: NonNullable<(typeof featuredRows)[number]["product"]> } => Boolean(fr.product))
       .map((fr) => ({
         categoryId: fr.category.id,
         categoryName: fr.category.name,
@@ -84,9 +120,14 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       }));
     if (featuredCategoryProducts.length < 3) {
       const fallback = await Promise.all(
-        pickedCategories.slice(featuredCategoryProducts.length).map(async (cat) => {
+        pickPool.slice(featuredCategoryProducts.length).map(async (cat) => {
           const p = await prisma.product.findFirst({
-            where: { categoryId: cat.id },
+            where: {
+              OR: [
+                { categoryId: cat.id },
+                { category: { parent: { id: cat.id } } },
+              ],
+            },
             select: { id: true, name: true, imageUrl: true },
             orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           });

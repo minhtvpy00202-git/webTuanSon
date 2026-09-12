@@ -81,12 +81,18 @@ model ContactInquiry {
 }
 
 model Category {
-  id       Int            @id @default(autoincrement())
-  name     String
-  slug     String         @unique
-  products Product[]
-  units    CategoryUnit[]
+  id        Int            @id @default(autoincrement())
+  name      String
+  slug      String         @unique
+  parentId  Int?
+  sortOrder Int            @default(0)
+  parent    Category?      @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[]     @relation("CategoryHierarchy")
+  products  Product[]
+  units     CategoryUnit[]
 
+  @@index([parentId, sortOrder])
+  @@index([sortOrder])
   @@map("categories")
 }
 
